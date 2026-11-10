@@ -1583,3 +1583,135 @@ func NameRequired() string { return In(i18n.Locale()).NameRequired() }
 func (msgs Messages) NameRequired() string {
 	return Catalog.Format(msgs.locale, "name_required", nil)
 }
+
+// CheckUpdates says "检查更新…"
+// in the language the app shows.
+func CheckUpdates() string { return In(i18n.Locale()).CheckUpdates() }
+
+// CheckUpdates says "检查更新…"
+// in the language of msgs.
+func (msgs Messages) CheckUpdates() string {
+	return Catalog.Format(msgs.locale, "check_updates", nil)
+}
+
+// CheckUpdatesNow says "检查更新"
+// in the language the app shows.
+func CheckUpdatesNow() string { return In(i18n.Locale()).CheckUpdatesNow() }
+
+// CheckUpdatesNow says "检查更新"
+// in the language of msgs.
+func (msgs Messages) CheckUpdatesNow() string {
+	return Catalog.Format(msgs.locale, "check_updates_now", nil)
+}
+
+// CurrentVersion says "当前版本"
+// in the language the app shows.
+func CurrentVersion() string { return In(i18n.Locale()).CurrentVersion() }
+
+// CurrentVersion says "当前版本"
+// in the language of msgs.
+func (msgs Messages) CurrentVersion() string {
+	return Catalog.Format(msgs.locale, "current_version", nil)
+}
+
+// SoftwareUpdates says "软件更新"
+// in the language the app shows.
+func SoftwareUpdates() string { return In(i18n.Locale()).SoftwareUpdates() }
+
+// SoftwareUpdates says "软件更新"
+// in the language of msgs.
+func (msgs Messages) SoftwareUpdates() string {
+	return Catalog.Format(msgs.locale, "software_updates", nil)
+}
+
+// GithubRepoLabel says "GitHub 仓库"
+// in the language the app shows.
+func GithubRepoLabel() string { return In(i18n.Locale()).GithubRepoLabel() }
+
+// GithubRepoLabel says "GitHub 仓库"
+// in the language of msgs.
+func (msgs Messages) GithubRepoLabel() string {
+	return Catalog.Format(msgs.locale, "github_repo_label", nil)
+}
+
+// OpenGithub says "打开 GitHub 仓库"
+// in the language the app shows.
+func OpenGithub() string { return In(i18n.Locale()).OpenGithub() }
+
+// OpenGithub says "打开 GitHub 仓库"
+// in the language of msgs.
+func (msgs Messages) OpenGithub() string {
+	return Catalog.Format(msgs.locale, "open_github", nil)
+}
+
+// OpenDownloadPage says "打开下载页"
+// in the language the app shows.
+func OpenDownloadPage() string { return In(i18n.Locale()).OpenDownloadPage() }
+
+// OpenDownloadPage says "打开下载页"
+// in the language of msgs.
+func (msgs Messages) OpenDownloadPage() string {
+	return Catalog.Format(msgs.locale, "open_download_page", nil)
+}
+
+// UpToDate says "已是最新版本"
+// in the language the app shows.
+func UpToDate() string { return In(i18n.Locale()).UpToDate() }
+
+// UpToDate says "已是最新版本"
+// in the language of msgs.
+func (msgs Messages) UpToDate() string {
+	return Catalog.Format(msgs.locale, "up_to_date", nil)
+}
+
+// UpToDateDetail says "当前版本 v{cur}，没有可用的更新。"
+// in the language the app shows.
+func UpToDateDetail(cur string) string { return In(i18n.Locale()).UpToDateDetail(cur) }
+
+// UpToDateDetail says "当前版本 v{cur}，没有可用的更新。"
+// in the language of msgs.
+func (msgs Messages) UpToDateDetail(cur string) string {
+	return Catalog.Format(msgs.locale, "up_to_date_detail", map[string]any{"cur": cur})
+}
+
+// UpdateFound says "发现新版本 v{new}"
+// in the language the app shows.
+func UpdateFound(new string) string { return In(i18n.Locale()).UpdateFound(new) }
+
+// UpdateFound says "发现新版本 v{new}"
+// in the language of msgs.
+func (msgs Messages) UpdateFound(new string) string {
+	return Catalog.Format(msgs.locale, "update_found", map[string]any{"new": new})
+}
+
+// UpdateFoundDetail says "当前版本 v{cur}，最新版本 v{new}。点“打开下载页”前往 Releases 下载。"
+// in the language the app shows.
+func UpdateFoundDetail(cur string, new string) string {
+	return In(i18n.Locale()).UpdateFoundDetail(cur, new)
+}
+
+// UpdateFoundDetail says "当前版本 v{cur}，最新版本 v{new}。点“打开下载页”前往 Releases 下载。"
+// in the language of msgs.
+func (msgs Messages) UpdateFoundDetail(cur string, new string) string {
+	return Catalog.Format(msgs.locale, "update_found_detail", map[string]any{"cur": cur, "new": new})
+}
+
+// UpdateFailed says "检查更新失败"
+// in the language the app shows.
+func UpdateFailed() string { return In(i18n.Locale()).UpdateFailed() }
+
+// UpdateFailed says "检查更新失败"
+// in the language of msgs.
+func (msgs Messages) UpdateFailed() string {
+	return Catalog.Format(msgs.locale, "update_failed", nil)
+}
+
+// UpdateFailedDetail says "没有连上 GitHub，请检查网络后重试。\n{err}"
+// in the language the app shows.
+func UpdateFailedDetail(err string) string { return In(i18n.Locale()).UpdateFailedDetail(err) }
+
+// UpdateFailedDetail says "没有连上 GitHub，请检查网络后重试。\n{err}"
+// in the language of msgs.
+func (msgs Messages) UpdateFailedDetail(err string) string {
+	return Catalog.Format(msgs.locale, "update_failed_detail", map[string]any{"err": err})
+}
