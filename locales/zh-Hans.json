@@ -191,5 +191,49 @@
     }
   },
   "op_failed": "操作没有完成",
-  "name_required": "请输入名称"
+  "name_required": "请输入名称",
+  "check_updates": "检查更新…",
+  "check_updates_now": "检查更新",
+  "current_version": "当前版本",
+  "software_updates": "软件更新",
+  "github_repo_label": "GitHub 仓库",
+  "open_github": "打开 GitHub 仓库",
+  "open_download_page": "打开下载页",
+  "up_to_date": "已是最新版本",
+  "up_to_date_detail": "当前版本 v{cur}，没有可用的更新。",
+  "@up_to_date_detail": {
+    "placeholders": {
+      "cur": {
+        "type": "String"
+      }
+    }
+  },
+  "update_found": "发现新版本 v{new}",
+  "@update_found": {
+    "placeholders": {
+      "new": {
+        "type": "String"
+      }
+    }
+  },
+  "update_found_detail": "当前版本 v{cur}，最新版本 v{new}。点“打开下载页”前往 Releases 下载。",
+  "@update_found_detail": {
+    "placeholders": {
+      "cur": {
+        "type": "String"
+      },
+      "new": {
+        "type": "String"
+      }
+    }
+  },
+  "update_failed": "检查更新失败",
+  "update_failed_detail": "没有连上 GitHub，请检查网络后重试。\n{err}",
+  "@update_failed_detail": {
+    "placeholders": {
+      "err": {
+        "type": "String"
+      }
+    }
+  }
 }
