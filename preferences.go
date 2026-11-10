@@ -261,6 +261,18 @@ func (a *App) settingsPane(c *ui.Context, t *ui.Theme) {
 		a.paneGroup(c, t, locales.Launch(), func() {
 			a.checkRow(c, t, locales.RestoreLast(), a.set.RestoreLast, func(v bool) { a.setRestoreLast(v) })
 		})
+		a.paneGroup(c, t, locales.SoftwareUpdates(), func() {
+			ui.Row(c).Gap(10).AlignItems(ui.Center).Children(func() {
+				ui.Text(c, locales.CurrentVersion()+"  v"+version).FontSize(13).TextColor(t.Text)
+				ui.Box(c).Grow(1)
+				a.prefButton(c, t, locales.CheckUpdatesNow(), func() { checkForUpdates() })
+			})
+			ui.Row(c).Gap(10).AlignItems(ui.Center).Children(func() {
+				ui.Text(c, locales.GithubRepoLabel()).FontSize(13).TextColor(t.TextMuted)
+				ui.Box(c).Grow(1)
+				a.prefButton(c, t, locales.OpenGithub(), func() { openURL(repoURL) })
+			})
+		})
 	default:
 		a.prefsTab = "file"
 		a.settingsPane(c, t)
@@ -276,6 +288,16 @@ func (a *App) settingsPane(c *ui.Context, t *ui.Theme) {
 		b.OnClick(a.resetSettings)
 		b.Children(func() { ui.Text(c, locales.ResetDefaults()).FontSize(13).TextColor(t.Text) })
 	})
+}
+
+// prefButton is a small labelled button of a settings pane.
+func (a *App) prefButton(c *ui.Context, t *ui.Theme, label string, click func()) {
+	b := ui.Row(c).Padding(6, 14).Radius(5).Background(t.Text.Alpha(0.06))
+	if b.Hovered() {
+		b.Background(t.Text.Alpha(0.1))
+	}
+	b.OnClick(click)
+	b.Children(func() { ui.Text(c, label).FontSize(13).TextColor(t.Text) })
 }
 
 // themeColorRows are the colors the custom theme is built from: the page,
