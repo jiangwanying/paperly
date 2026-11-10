@@ -1,6 +1,6 @@
 <div align="center">
 
-# ✍️ Paperly
+# <img src="assets/icon.png" height="44" alt="Paperly 图标"> Paperly
 
 **开源、原生、单二进制的 Markdown 编辑器**
 
