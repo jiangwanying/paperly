@@ -191,5 +191,49 @@
     }
   },
   "op_failed": "The operation did not finish",
-  "name_required": "Type a name"
+  "name_required": "Type a name",
+  "check_updates": "Check for Updates…",
+  "check_updates_now": "Check for Updates",
+  "current_version": "Current version",
+  "software_updates": "Software Updates",
+  "github_repo_label": "GitHub Repository",
+  "open_github": "Open GitHub Repository",
+  "open_download_page": "Open the Download Page",
+  "up_to_date": "You're up to date",
+  "up_to_date_detail": "Paperly v{cur} is the newest one; nothing to update.",
+  "@up_to_date_detail": {
+    "placeholders": {
+      "cur": {
+        "type": "String"
+      }
+    }
+  },
+  "update_found": "New version v{new}",
+  "@update_found": {
+    "placeholders": {
+      "new": {
+        "type": "String"
+      }
+    }
+  },
+  "update_found_detail": "You are on v{cur}; v{new} is out. Click \"Open the Download Page\" to get it.",
+  "@update_found_detail": {
+    "placeholders": {
+      "cur": {
+        "type": "String"
+      },
+      "new": {
+        "type": "String"
+      }
+    }
+  },
+  "update_failed": "Could not check for updates",
+  "update_failed_detail": "GitHub was not reachable; check the network and try again.\n{err}",
+  "@update_failed_detail": {
+    "placeholders": {
+      "err": {
+        "type": "String"
+      }
+    }
+  }
 }
