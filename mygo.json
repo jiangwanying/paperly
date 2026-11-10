@@ -1,0 +1,21 @@
+{
+  "name": "Paperly",
+  "identifier": "app.paperly",
+  "version": "0.1.0",
+  "out": "build",
+  "i18n": {
+    "dir": "locales",
+    "source": "zh-Hans"
+  },
+  "fileAssociations": [
+    {
+      "ext": [
+        "md",
+        "markdown"
+      ],
+      "name": "Markdown Document",
+      "mimeType": "text/markdown",
+      "role": "Editor"
+    }
+  ]
+}
