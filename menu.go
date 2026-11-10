@@ -134,6 +134,8 @@ func (a *App) menuItems() []*mygo.MenuItem {
 		}},
 		{Label: locales.MenuHelp(), Submenu: []*mygo.MenuItem{
 			{ID: "help.about", Label: locales.About(), Click: about},
+			{ID: "help.update", Label: locales.CheckUpdates(), Click: func(*mygo.MenuItem, *mygo.Window) { checkForUpdates() }},
+			mygo.Separator(),
 			{ID: "help.keys", Label: locales.Shortcuts(), Disabled: true},
 		}},
 	}
@@ -163,20 +165,30 @@ func (a *App) languageItems() []*mygo.MenuItem {
 	}
 }
 
-// about shows the app's name and what it is.
+// about shows the app's name, its version and where it lives on GitHub;
+// the buttons open the repository and run the update check.
 func about(*mygo.MenuItem, *mygo.Window) {
 	go func() {
-		_, _ = mygo.Dialog.Message(mygo.MessageOptions{
+		r, err := mygo.Dialog.Message(mygo.MessageOptions{
 			Title:   "Paperly",
-			Message: "Paperly",
-			Detail:  locales.AboutDetail() + "\n" + version,
-			Buttons: []string{locales.Ok()},
+			Message: "Paperly " + version,
+			Detail:  locales.AboutDetail() + "\n\n" + locales.GithubRepoLabel() + ": " + repoURL,
+			Buttons: []string{locales.OpenGithub(), locales.CheckUpdates(), locales.Ok()},
 		})
+		if err != nil {
+			return
+		}
+		switch r.Button {
+		case 0:
+			openURL(repoURL)
+		case 1:
+			checkForUpdates()
+		}
 	}()
 }
 
 // version is the build's, replaced when packaging.
-var version = "0.1.0"
+var version = "0.1.1"
 
 // canFormat reports whether a command that rewrites text has anywhere to
 // write: the block being edited.
