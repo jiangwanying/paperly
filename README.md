@@ -6,7 +6,7 @@
 
 光标落在哪里，哪里就露出源码；其余部分始终是你保存后看到的样子。
 
-[![Version](https://img.shields.io/badge/version-0.1.0_preview-blue)](#) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#从源码构建)
+[![Version](https://img.shields.io/badge/version-0.1.1_preview-blue)](#) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#从源码构建)
 
 <img src="testdata/shots/shot-real.jpg" alt="Paperly：大纲面板 + 实时渲染" width="880">
 
