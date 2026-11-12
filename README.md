@@ -2,11 +2,11 @@
 
 # <img src="assets/icon.png" height="44" alt="Paperly 图标"> Paperly
 
-**开源、原生、单二进制的 Markdown 编辑器**
+**开源、原生、单二进制的 Markdown 编辑器 —— 用 Go + MyGo 原生 UI 构建**
 
 光标落在哪里，哪里就露出源码；其余部分始终是你保存后看到的样子。
 
-[![Version](https://img.shields.io/badge/version-0.1.1_preview-blue)](#) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#从源码构建)
+[![Version](https://img.shields.io/badge/version-0.1.1_preview-blue)](#) [![Built with MyGo](https://img.shields.io/badge/built%20with-MyGo-3B82F6)](https://mygo.run) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#从源码构建)
 
 <img src="testdata/shots/promo.jpg" alt="Paperly：块级活预览，光标处才露出源码" width="880">
 
@@ -43,7 +43,7 @@
 - **Typora 一派**（所见即所得）：手感好，但整个编辑器是一层 Chromium 套壳，闭源收费；
 - **Obsidian / VS Code 一派**（源码 + 预览）：功能强、生态好，但 Electron 动辄两三百 MB 内存占用，或者要左右分栏来回看。
 
-Paperly 走第三条路：**用 Go 写的原生应用，安装包几 MB，内存占用低**，把 Typora 的"块级编辑"和 Obsidian 的"Live Preview"合到一起。核心设计只有一条：
+Paperly 走第三条路：**用 Go + [MyGo](https://mygo.run) 写的原生应用**——界面由原生控件直接绘制，没有 Chromium，也没有 WebView——安装包几 MB，内存占用低，把 Typora 的"块级编辑"和 Obsidian 的"Live Preview"合到一起。核心设计只有一条：
 
 > **真值永远是纯文本 Markdown**——文件就是普通的 `.md`，没有任何私有格式、没有数据库锁定，随时可以换任何其他编辑器继续写。渲染只是一种显示状态：光标进哪个块，哪个块变回源码供你编辑；光标离开，它立刻变回渲染后的样子。
 
