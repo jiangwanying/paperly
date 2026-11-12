@@ -189,6 +189,10 @@ Download from [Releases](https://github.com/jiangwanying/paperly/releases):
 2. `.md` associations are written to the registry during install; set Paperly as the default in Settings → Default apps, or from the file's "Open with" menu
 3. Prefer not to install? Download the portable `Paperly.exe` and run it
 
+### Linux
+
+For now the Linux build comes from source: `mygo build -platform linux/amd64` (or `linux/arm64`), with the output in `build/linux-<arch>/` — on Debian/Ubuntu install `paperly_x.y.z_amd64.deb` with `sudo dpkg -i`, elsewhere unpack the `tar.gz` and run its `install.sh`, and Arch can use the `PKGBUILD` that comes with it. The commands are under [Build from source](#build-from-source).
+
 ### From the command line
 
 ```bash
@@ -211,15 +215,26 @@ cd paperly
 # run every test (10 test files, offscreen-rendered end-to-end editor behaviour)
 go test ./...
 
-# build the binary for this machine
-go build -o paperly .
+# run it from source: a development build that reloads as you edit
+mygo dev
+
+# or build the binary for this machine and run it
+go build -o paperly . && ./paperly
 
 # package the macOS app and dmg
 mygo build
 
 # package the Windows exe and NSIS installer (needs makensis)
 mygo build -platform windows/amd64
+
+# package Linux (amd64 / arm64)
+mygo build -platform linux/amd64
+mygo build -platform linux/arm64
 ```
+
+`mygo dev` compiles the app and opens it in development mode, reloading whenever the code changes; `go build` gives you a plain `paperly` executable you can launch from a terminal or a file manager.
+
+Linux output lands in `build/linux-<arch>/`: the `paperly` executable, a Debian package `paperly_<version>_<arch>.deb`, a `paperly-<version>-linux-<arch>.tar.gz` with an `install.sh`, and a `PKGBUILD` for Arch. The Linux build draws its windows through GTK 3, loaded at runtime — desktop distributions usually have it; on Debian/Ubuntu the package is `libgtk-3-0`.
 
 ---
 
