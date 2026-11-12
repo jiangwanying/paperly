@@ -8,12 +8,12 @@
 
 [![Version](https://img.shields.io/badge/version-0.1.1_preview-blue)](#) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#从源码构建)
 
-<img src="testdata/shots/shot-real.jpg" alt="Paperly：大纲面板 + 实时渲染" width="880">
+<img src="testdata/shots/promo.jpg" alt="Paperly：块级活预览，光标处才露出源码" width="880">
 
 </div>
 
 > [!IMPORTANT]
-> **当前为早期预览版（v0.1.0）**——核心写作体验已经完整：活预览、条目级编辑、文件管理、全文搜索、双平台 `.md` 关联。但细节仍在打磨，路线图上的功能（表格编辑、跨块选区、导出 PDF）尚未落地。
+> **当前为早期预览版（v0.1.1）**——核心写作体验已经完整：活预览、条目级编辑、文件管理、全文搜索、双平台 `.md` 关联。但细节仍在打磨，路线图上的功能（表格编辑、跨块选区、导出 PDF）尚未落地。
 >
 > 遇到 bug、不顺手的地方，或者想要的功能，欢迎 [提 Issue](https://github.com/jiangwanying/paperly/issues)；想直接动手修，[提 PR](https://github.com/jiangwanying/paperly/pulls) 更受欢迎。
 
