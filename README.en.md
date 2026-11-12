@@ -6,7 +6,7 @@
 
 The block under the caret shows its source; everything else always looks the way it will when you save.
 
-[![Version](https://img.shields.io/badge/version-0.1.1_preview-blue)](#) [![Built with MyGo](https://img.shields.io/badge/built%20with-MyGo-3B82F6)](https://mygo.run) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#build-from-source)
+[![Version](https://img.shields.io/badge/version-0.1.1_preview-blue)](#) [![Built with MyGo](https://img.shields.io/badge/built%20with-MyGo-3B82F6)](https://mygo.run) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#build-from-source)
 
 <img src="testdata/shots/promo.jpg" alt="Paperly: block-level live preview, source only where the caret is" width="880">
 
@@ -169,7 +169,7 @@ The search field in the sidebar goes past file names:
 
 **Where Paperly fits**: if you want Typora's feel and Obsidian's live preview, without paying for closed software or carrying two hundred megabytes of Electron, this is a single file of a few megabytes whose data is always plain Markdown.
 
-**An honest note on v0.1**: table editing, character-level cross-block selection, drag-and-drop images and PDF export are on the roadmap; there is no plugin system; macOS (Intel and Apple Silicon) and Windows (x64) are covered.
+**An honest note on v0.1**: table editing, character-level cross-block selection, drag-and-drop images and PDF export are on the roadmap; there is no plugin system; macOS (Intel and Apple Silicon), Windows (x64) and Linux (x64 / arm64) are covered.
 
 ---
 
@@ -191,7 +191,10 @@ Download from [Releases](https://github.com/jiangwanying/paperly/releases):
 
 ### Linux
 
-For now the Linux build comes from source: `mygo build -platform linux/amd64` (or `linux/arm64`), with the output in `build/linux-<arch>/` — on Debian/Ubuntu install `paperly_x.y.z_amd64.deb` with `sudo dpkg -i`, elsewhere unpack the `tar.gz` and run its `install.sh`, and Arch can use the `PKGBUILD` that comes with it. The commands are under [Build from source](#build-from-source).
+1. Download `paperly_x.y.z_amd64.deb` (x64) or `paperly_x.y.z_arm64.deb` (arm64) from [Releases](https://github.com/jiangwanying/paperly/releases); on Debian / Ubuntu run `sudo dpkg -i paperly_0.1.1_amd64.deb`
+2. Elsewhere, take `paperly-x.y.z-linux-amd64.tar.gz` (or arm64) and run the `install.sh` inside it — it installs into `~/.local` and can update itself; Arch can use the `PKGBUILD` in the same archive
+3. The window is drawn through GTK 3, which desktop distributions usually ship; on Debian / Ubuntu the package is `libgtk-3-0`
+4. To compile it yourself, see [Build from source](#build-from-source)
 
 ### From the command line
 
