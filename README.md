@@ -10,6 +10,8 @@
 
 <img src="testdata/shots/promo.jpg" alt="Paperly：块级活预览，光标处才露出源码" width="880">
 
+<sub>[English](README.en.md) · 简体中文</sub>
+
 </div>
 
 > [!IMPORTANT]
