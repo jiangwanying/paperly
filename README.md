@@ -6,7 +6,7 @@
 
 光标落在哪里，哪里就露出源码；其余部分始终是你保存后看到的样子。
 
-[![Version](https://img.shields.io/badge/version-0.1.1_preview-blue)](#) [![Built with MyGo](https://img.shields.io/badge/built%20with-MyGo-3B82F6)](https://mygo.run) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#从源码构建)
+[![Version](https://img.shields.io/badge/version-0.1.1_preview-blue)](#) [![Built with MyGo](https://img.shields.io/badge/built%20with-MyGo-3B82F6)](https://mygo.run) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#从源码构建)
 
 <img src="testdata/shots/promo.jpg" alt="Paperly：块级活预览，光标处才露出源码" width="880">
 
@@ -169,7 +169,7 @@ Paperly 走第三条路：**用 Go + [MyGo](https://mygo.run) 写的原生应用
 
 **Paperly 的定位**：如果你想要 Typora 的手感、Obsidian 的活预览，但不想为闭源付费、不想背着两百 MB 的 Electron——这是一个单文件、几 MB、数据永远是纯 Markdown 的选择。
 
-**诚实说明 v0.1 的边界**：表格编辑、跨块字符级选区、图片拖拽导入、导出 PDF 在路线图上；没有插件系统；目前覆盖 macOS（Intel）与 Windows（x64）。
+**诚实说明 v0.1 的边界**：表格编辑、跨块字符级选区、图片拖拽导入、导出 PDF 在路线图上；没有插件系统；目前覆盖 macOS（Intel 与 Apple Silicon）、Windows（x64）与 Linux（x64 / arm64）。
 
 ---
 
@@ -191,7 +191,10 @@ Paperly 走第三条路：**用 Go + [MyGo](https://mygo.run) 写的原生应用
 
 ### Linux
 
-Linux 版目前从源码构建：`mygo build -platform linux/amd64`（或 `linux/arm64`），产物在 `build/linux-<arch>/`——Debian/Ubuntu 用 `sudo dpkg -i paperly_x.y.z_amd64.deb`，其他发行版解压 `tar.gz` 后跑里面的 `install.sh`，Arch 用附带的 `PKGBUILD`。命令细节见[从源码构建](#从源码构建)。
+1. 从 [Releases](https://github.com/jiangwanying/paperly/releases) 下载 `paperly_x.y.z_amd64.deb`（x64）或 `paperly_x.y.z_arm64.deb`（arm64），Debian / Ubuntu 上执行 `sudo dpkg -i paperly_0.1.1_amd64.deb`
+2. 其他发行版下载 `paperly-x.y.z-linux-amd64.tar.gz`（或 arm64），解压后运行里面的 `install.sh`——装到 `~/.local`，可以自更新；Arch 也能用包里的 `PKGBUILD`
+3. 窗口通过 GTK 3 绘制，桌面发行版一般已自带；Debian / Ubuntu 缺库时装 `libgtk-3-0`
+4. 想自己编译见[从源码构建](#从源码构建)
 
 ### 从命令行打开
 
