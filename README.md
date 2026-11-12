@@ -189,6 +189,10 @@ Paperly 走第三条路：**用 Go + [MyGo](https://mygo.run) 写的原生应用
 2. `.md` 关联在安装时自动写入注册表；在"设置 → 默认应用"或文件右键"打开方式"中设为默认
 3. 不想安装？下载 `Paperly.exe` 绿色版直接运行
 
+### Linux
+
+Linux 版目前从源码构建：`mygo build -platform linux/amd64`（或 `linux/arm64`），产物在 `build/linux-<arch>/`——Debian/Ubuntu 用 `sudo dpkg -i paperly_x.y.z_amd64.deb`，其他发行版解压 `tar.gz` 后跑里面的 `install.sh`，Arch 用附带的 `PKGBUILD`。命令细节见[从源码构建](#从源码构建)。
+
 ### 从命令行打开
 
 ```bash
@@ -211,15 +215,26 @@ cd paperly
 # 跑全部测试（10 组测试文件，覆盖编辑器行为全链路的离屏渲染测试）
 go test ./...
 
-# 构建本机可执行文件
-go build -o paperly .
+# 本地跑起来：开发模式，改代码自动重载
+mygo dev
+
+# 或者编译成本机可执行文件，直接运行
+go build -o paperly . && ./paperly
 
 # 打包 macOS app 与 dmg
 mygo build
 
 # 打包 Windows exe 与 NSIS 安装器（需要 makensis）
 mygo build -platform windows/amd64
+
+# 打包 Linux（amd64 / arm64）
+mygo build -platform linux/amd64
+mygo build -platform linux/arm64
 ```
+
+`mygo dev` 会编译并以开发模式打开窗口，改完代码自动重载；`go build` 出来的 `paperly` 是普通可执行文件，双击或在终端里 `./paperly` 都能用。
+
+Linux 的产物在 `build/linux-<arch>/`：可执行文件 `paperly`、Debian 包 `paperly_<version>_<arch>.deb`、带 `install.sh` 的 `paperly-<version>-linux-<arch>.tar.gz`，以及给 Arch 的 `PKGBUILD`。Linux 版通过 GTK 3 绘制窗口（运行时加载，桌面发行版一般已自带；Debian/Ubuntu 缺的话装 `libgtk-3-0`）。
 
 ---
 
