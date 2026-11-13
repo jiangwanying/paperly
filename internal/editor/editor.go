@@ -86,13 +86,28 @@ type Editor struct {
 
 	zoomAddr  string // the picture the veil over the page shows
 	zoomCache map[string]ui.ImageSource
+
+	tbl       table           // the table being written, when the block is one
+	heights   map[int]float32 // how tall each block was, from the frame it was laid out
+	cullN     int             // the block count those heights belong to
+	cullW     float32         // the text measure they were taken at
+	cullSize  float32         // the font size they were taken at
+	laid      int             // blocks laid out, for the tests to watch
+	lastBlock int             // the block the pointer last stood on, -1 for none
+	canvasY   float32         // where the pointer last was over the page, in its own coordinates
+	testMod   ui.Modifiers    // a modifier a test holds, the pointer's presses carrying none
+	pageSel   int             // the parts of the page's selection, from the last frame
+	selMode   bool            // the page is selecting, as of this frame
+	dbgPress  bool
+	dbgSel    string
 }
 
 // New shows d in the look sh describes.
 func New(d *doc.Doc, sh *Shared) *Editor {
 	return &Editor{doc: d, sh: sh, active: -1, scrollTo: -1, pageH: 600, caret: -1,
-		itemLine: -1, itemCaret: -1,
-		tops: map[int]float32{}, marked: map[int]string{}}
+		itemLine: -1, itemCaret: -1, lastBlock: -1,
+		tops: map[int]float32{}, marked: map[int]string{}, heights: map[int]float32{},
+		tbl: table{focusR: -1, focusC: -1}}
 }
 
 // Attach gives the editor the window that shows it and the document it
@@ -146,8 +161,13 @@ func (e *Editor) Activate(i int) {
 		return
 	}
 	e.active, e.pending = i, false
+	e.lastBlock = i
 	e.draft = strings.TrimRight(e.doc.Source()[b.Start:b.End], "\n")
 	e.itemLine, e.lineDraft, e.itemCaret = -1, "", -1
+	e.resetTable()
+	if b.Kind == parser.Table {
+		e.startTable(e.draft)
+	}
 	if e.itemsMode() {
 		e.itemLine, e.lineDraft, e.itemCaret = 0, linesOf(e.draft)[0], 0
 	}
@@ -160,13 +180,87 @@ func (e *Editor) StartParagraph() {
 	e.startAt(len(e.doc.Source()))
 }
 
-// InsertAfter writes a new block below block i.
+// InsertAfter writes a new block below block i. What is being written is
+// committed first, so that the room the commit leaves is counted in the
+// offset the new block goes to.
 func (e *Editor) InsertAfter(i int) {
+	e.startAfter(i)
+}
+
+// startAfter is where the block below block i goes, once what is being
+// written has joined the document: the commit can move the room the block
+// has, by a trailing break it trims or a span it rewrites.
+func (e *Editor) startAfter(i int) {
+	if e.editing() {
+		e.Commit()
+	}
 	b, ok := e.doc.Block(i)
 	if !ok {
+		e.StartParagraph()
 		return
 	}
 	e.startAt(b.End)
+}
+
+// insertAt writes text in a block of its own at the byte offset at: the
+// end of the room a click or a menu was opened on. Empty text just leaves
+// the caret there, for a paragraph to be written.
+func (e *Editor) insertAt(at int, text string) {
+	e.startAt(at)
+	if text == "" {
+		return
+	}
+	e.draft = text
+	e.Commit()
+}
+
+// insertAtY is where a block put in the empty room at y goes: below the
+// block the room is beside, above the first one, and at the end below the
+// last.
+func (e *Editor) insertAtY(y float32) int {
+	i := e.blockNear(y)
+	if i < 0 {
+		return 0
+	}
+	if i == e.doc.Len()-1 {
+		return len(e.doc.Source())
+	}
+	if b, ok := e.doc.Block(i); ok {
+		return b.End
+	}
+	return len(e.doc.Source())
+}
+
+// blockNear is the block whose room holds the page's y, or the one nearest
+// to it. It is -1 above the first block, and for a document with none.
+func (e *Editor) blockNear(y float32) int {
+	if e.doc.Len() == 0 {
+		return -1
+	}
+	if top, ok := e.tops[0]; ok {
+		if h, ok := e.heights[0]; ok && h > 0 && y < top {
+			return -1
+		}
+	}
+	best, bestD := -1, float32(0)
+	for i := range e.doc.Blocks() {
+		top, ok := e.tops[i]
+		h := e.heights[i]
+		if !ok || h <= 0 {
+			continue
+		}
+		if y >= top && y < top+h {
+			return i
+		}
+		d := top - y
+		if y >= top+h {
+			d = y - top - h
+		}
+		if best < 0 || d < bestD {
+			best, bestD = i, d
+		}
+	}
+	return best
 }
 
 func (e *Editor) startAt(at int) {
@@ -190,6 +284,7 @@ func (e *Editor) startAt(at int) {
 func (e *Editor) Cancel() {
 	e.active, e.pending, e.draft = -1, false, ""
 	e.resetItem()
+	e.resetTable()
 }
 
 // sync writes the draft into the document as it is typed, without leaving
@@ -341,6 +436,7 @@ func (e *Editor) Commit() {
 	text := strings.TrimRight(e.draft, "\n")
 	e.active, e.draft = -1, ""
 	e.resetItem()
+	e.resetTable()
 	if !ok {
 		return
 	}
@@ -588,6 +684,14 @@ func (e *Editor) restore(s snapshot) {
 // DeleteBlock takes a block out of the document, and the blank lines around
 // it, so that it leaves no empty paragraph behind.
 func (e *Editor) DeleteBlock(i int) {
+	// A paragraph that is not in the document yet — the one a click in the
+	// empty room opened — goes by being dropped, not by being cut out.
+	if i < 0 {
+		if e.pending {
+			e.Cancel()
+		}
+		return
+	}
 	b, ok := e.doc.Block(i)
 	if !ok {
 		return
@@ -802,7 +906,9 @@ func (e *Editor) page(c *ui.Context, t *ui.Theme) {
 		ui.Column(c).Grow(1).Children(func() {
 			if e.source {
 				page = ui.Column(c).Grow(1)
-				page.Children(func() { e.sourceArea(c, t) })
+				page.Children(func() {
+					e.sourceArea(c, t)
+				})
 			} else {
 				page = ui.Scroll(c).TrackScroll(&e.scroll).Grow(1)
 				page.Children(func() {
@@ -842,17 +948,56 @@ func (e *Editor) sideToggle(c *ui.Context, t *ui.Theme) {
 // them, all of it ready to take a click.
 func (e *Editor) canvas(c *ui.Context) {
 	blocks := e.doc.Blocks()
+	// The heights a frame measured hold until the blocks themselves change
+	// — one added or taken away, the measure or the type size moved.
+	if len(blocks) != e.cullN || e.cullW != e.measure() || e.cullSize != e.sh.Size {
+		e.heights = map[int]float32{}
+		e.cullN, e.cullW, e.cullSize = len(blocks), e.measure(), e.sh.Size
+	}
 	at := e.pendingAfter()
+	var canvasRow ui.Element
+	canvasRow = ui.Row(c).MinHeight(e.pageH).AlignItems(ui.Stretch)
+	// Where the pointer is over the page is read before anything is built:
+	// a menu's function runs while the row is being built, and the room it
+	// was opened on has to be known by then — the last frame's, if the
+	// pointer has not moved since, and this one's when it has.
+	if _, y, over := canvasRow.PointerPosition(); over {
+		e.canvasY = y
+	}
+	// In selection mode the page is the text's: a click in the room around
+	// it would start a paragraph and leave the mode, so the room waits. A
+	// selection made outlasts the modifier, so that Copy still has it once
+	// the key is let go; the click that drops the selection ends the mode.
+	sel := e.selecting(c)
+	e.selMode = sel
+
 	// The page takes the click that no block took: the room between and
 	// below them, and the margins either side of the text. A click on a
-	// block never reaches it.
-	canvasRow := ui.Row(c).MinHeight(e.pageH).
-		AlignItems(ui.Stretch).
-		OnClick(e.StartParagraph).
-		ContextMenu(func(m *ui.Menu) { e.canvasMenu(c, m) })
+	// block never reaches it. The room tells where a block put in from
+	// there goes, so that a click in the middle of the text does not leave
+	// its paragraph at the end of it. While the page selects, the room
+	// keeps still: a click there would start a paragraph and end the
+	// selection the reader is making.
+	room := func(el ui.Element) ui.Element {
+		if sel {
+			return el
+		}
+		return el.OnClick(func() { e.startAt(e.insertAtY(e.canvasY)) })
+	}
+	room(canvasRow).ContextMenu(func(m *ui.Menu) { e.canvasMenu(c, m, e.insertAtY(e.canvasY)) })
 	canvasRow.Children(func() {
-		ui.Box(c).Grow(1).OnClick(e.StartParagraph)
-		ui.Column(c).Width(e.measure()).Padding(28, 0).Children(func() {
+		room(ui.Box(c).Grow(1))
+		// The key keeps the page's own state — the selection across its
+		// blocks — from one frame to the next, which a column without one
+		// would lose as the blocks around it came and went.
+		page := ui.Column(c.Key("page")).Width(e.measure()).Padding(28, 0)
+		if sel {
+			page = e.selectable(page)
+			// The menu of the selection: its source as Markdown, or its
+			// text, or the whole page, as the text of a page offers.
+			page = page.ContextMenu(func(m *ui.Menu) { e.selectMenu(c, m, page) })
+		}
+		page.Children(func() {
 			if e.pending && at < 0 {
 				e.blankRoom(c, 0, e.at, e.at)
 				e.newBlock(c)
@@ -863,7 +1008,13 @@ func (e *Editor) canvas(c *ui.Context) {
 					cur, _ := e.doc.Block(i)
 					e.blankRoom(c, prev.End, cur.Start, cur.Start)
 				}
-				e.block(c, i)
+				if e.culled(i) {
+					// Far from the viewport: its room stays, its content
+					// waits for a frame that can see it.
+					ui.Box(c).Height(e.heights[i])
+				} else {
+					e.block(c, i)
+				}
 				if e.pending && at == i {
 					if b, ok := e.doc.Block(i); ok {
 						e.blankRoom(c, b.End, e.at, e.at)
@@ -878,9 +1029,12 @@ func (e *Editor) canvas(c *ui.Context) {
 			}
 			// The room under the last block takes a click too, and puts the
 			// caret in a new paragraph at the end.
-			ui.Box(c).Grow(1).MinHeight(60).OnClick(e.StartParagraph)
+			room(ui.Box(c).Grow(1).MinHeight(60))
 		})
-		ui.Box(c).Grow(1).OnClick(e.StartParagraph)
+		if sel {
+			e.pageSel = len(page.SelectedTexts())
+		}
+		room(ui.Box(c).Grow(1))
 	})
 }
 
@@ -1000,6 +1154,7 @@ func (e *Editor) block(c *ui.Context, i int) {
 	if !ok {
 		return
 	}
+	e.laid++
 	if i == e.active {
 		// The block being written shows at the size its syntax says: a
 		// heading grows as the "# " is typed, and the markers fade. It sits
@@ -1012,22 +1167,32 @@ func (e *Editor) block(c *ui.Context, i int) {
 			ContextMenu(func(m *ui.Menu) { e.blockMenu(c, m, i) })
 		col.Children(func() {
 			ui.Themed(c, &ut).Children(func() {
-				if e.itemsMode() {
+				switch {
+				case e.tbl.on:
+					e.editTable(c)
+				case e.itemsMode():
 					e.editItems(c, c.Theme())
-				} else {
+				default:
 					e.editArea(c)
 				}
 			})
 		})
 		e.reveal(col, i)
+		e.place(i, col)
 		return
 	}
 	// The view takes no selection of its own (ShareSelection), so the click
 	// and the menu of the block around it get the pointer.
 	src := e.doc.Source()[b.Start:b.End]
 	col := ui.Column(c.Key(i)).Padding(e.above(i), 0).
-		OnClick(func() { e.Activate(i) }).
 		ContextMenu(func(m *ui.Menu) { e.blockMenu(c, m, i) })
+	if !e.selecting(c) {
+		// Clicking a block opens it for writing; while the selection
+		// modifier is held the block keeps that to itself no longer, and
+		// its text joins the page's selection.
+		col = col.OnClick(func() { e.Activate(i) })
+	}
+
 	// A block a search lands in shows its words marked: the matches are
 	// wrapped in <mark> in the source the view draws, in a paragraph, a
 	// heading, an item, a quote or a cell alike. A block with no text to
@@ -1049,9 +1214,66 @@ func (e *Editor) block(c *ui.Context, i int) {
 		markdown.View(c, src, &e.md)
 	})
 	e.reveal(col, i)
-	if b := col.Bounds(); b.H > 0 {
-		e.tops[i] = b.Y + e.scroll.Y
+	e.place(i, col)
+}
+
+// place records where a block was laid out and how tall it is, so that the
+// frames that follow can leave it out and still keep the page as tall: the
+// blocks below it move by however much it grew or shrank.
+func (e *Editor) place(i int, col ui.Element) {
+	b := col.Bounds()
+	if b.H <= 0 {
+		return
 	}
+	e.tops[i] = b.Y + e.scroll.Y
+	old, had := e.heights[i]
+	e.heights[i] = b.H
+	if !had {
+		return
+	}
+	d := b.H - old
+	if d > 0.5 || d < -0.5 {
+		for j := i + 1; j < e.cullN; j++ {
+			if t, ok := e.tops[j]; ok {
+				e.tops[j] = t + d
+			}
+		}
+	}
+}
+
+// culled tells whether a block can stay out of this frame: it is far enough
+// from the viewport, its height is known, and it is not the one being
+// written or the one the page is being asked to show. A small document lays
+// itself out whole, as it always did.
+func (e *Editor) culled(i int) bool {
+	if e.cullN < 60 || len(e.heights) < e.cullN || e.pageH <= 0 {
+		return false
+	}
+	// A block left out of the frame takes its text with it, and a
+	// selection running through it could not hold what it does not show:
+	// while the page selects, every block is laid out.
+	if e.selMode {
+		return false
+	}
+	h, known := e.heights[i]
+	if !known || h <= 0 {
+		return false
+	}
+	if i == e.active {
+		return false
+	}
+	if e.scrollTo >= 0 && i >= e.scrollTo-2 && i <= e.scrollTo+2 {
+		return false
+	}
+	top, known := e.tops[i]
+	if !known {
+		return false
+	}
+	// A viewport of room above and below: a block is laid out before it
+	// can be seen, so scrolling does not show blank paper.
+	topEdge := e.scroll.Y - e.pageH
+	bottomEdge := e.scroll.Y + 2*e.pageH
+	return top+h < topEdge || top > bottomEdge
 }
 
 // reveal brings a block into view when an outline click asked for it: the
@@ -1161,10 +1383,16 @@ func (e *Editor) status(c *ui.Context, t *ui.Theme) {
 		return
 	}
 	chars := len([]rune(e.doc.Source()))
+	selecting := e.selecting(c)
 	ui.Row(c).Padding(6, 18).AlignItems(ui.Center).Gap(14).Children(func() {
 		ui.Text(c, locales.StatusChars(chars)).FontSize(13).TextColor(t.TextMuted)
 		if m := readingMinutes(chars, e.sh.ReadingSpeed); m != "" {
 			ui.Text(c, m).FontSize(13).TextColor(t.TextMuted)
+		}
+		// The modifier is a mode of its own, and says so while it is held:
+		// a click would open a block for writing on any other frame.
+		if selecting {
+			ui.Text(c, locales.SelectMode()).FontSize(13).TextColor(t.TextMuted)
 		}
 	})
 }

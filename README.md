@@ -6,7 +6,7 @@
 
 光标落在哪里，哪里就露出源码；其余部分始终是你保存后看到的样子。
 
-[![Version](https://img.shields.io/badge/version-0.1.1_preview-blue)](#) [![Built with MyGo](https://img.shields.io/badge/built%20with-MyGo-3B82F6)](https://mygo.run) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#从源码构建)
+[![Version](https://img.shields.io/badge/version-0.1.2_preview-blue)](#) [![Built with MyGo](https://img.shields.io/badge/built%20with-MyGo-3B82F6)](https://mygo.run) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#从源码构建)
 
 <img src="testdata/shots/promo.jpg" alt="Paperly：块级活预览，光标处才露出源码" width="880">
 
@@ -15,7 +15,7 @@
 </div>
 
 > [!IMPORTANT]
-> **当前为早期预览版（v0.1.1）**——核心写作体验已经完整：活预览、条目级编辑、文件管理、全文搜索、双平台 `.md` 关联。但细节仍在打磨，路线图上的功能（表格编辑、跨块选区、导出 PDF）尚未落地。
+> **当前为早期预览版（v0.1.2）**——核心写作体验已经完整：活预览、条目级编辑、表格编辑、跨块选区、文件管理、全文搜索、双平台 `.md` 关联。但细节仍在打磨，路线图上的功能（图片拖拽导入、导出 PDF）尚未落地。
 >
 > 遇到 bug、不顺手的地方，或者想要的功能，欢迎 [提 Issue](https://github.com/jiangwanying/paperly/issues)；想直接动手修，[提 PR](https://github.com/jiangwanying/paperly/pulls) 更受欢迎。
 
@@ -103,6 +103,8 @@ Paperly 走第三条路：**用 Go + [MyGo](https://mygo.run) 写的原生应用
 
 ### 6. 写作细节
 
+- **跨块选区**：按住 `⌥` 拖动，可以从一段中间选到另一段中间，字符级、跨块；`⇧` 点按或 `⇧` + 方向键继续扩展；长文档拖选时自动临时关闭视口裁剪，整篇拖选不中断。选区建好后就不再需要 `⌥`：`⌘A` 全选、`⌘C` 复制为纯文本（段落间以空行分隔）；**右键选区**还可以「复制为 Markdown」——带 `**`、`` ` ``、链接地址等源码标记
+- 松开 `⌥` 选区仍在；单击一下收掉选区，再点段落就回到改源码的编辑态
 - **查找替换**：逐块定位、命中高亮（高亮颜色可自定义）
 - **大纲面板**：列出全文标题结构，点击直达对应位置
 - **撤销**：200 步快照，撤销语义在列表条目编辑中也保持正确
@@ -114,6 +116,21 @@ Paperly 走第三条路：**用 Go + [MyGo](https://mygo.run) 写的原生应用
 
 - **macOS**：dmg 安装包；`Info.plist` 声明 `.md` / `.markdown` 文档类型（Finder"打开方式"可选为默认）；双击 `.md`、Dock 拖入、命令行传路径都能打开
 - **Windows**：NSIS 安装器——自定义安装路径、可选桌面快捷方式、自动注册 `.md` 关联（ProgID + OpenWithProgids）、卸载时清理注册表；另附绿色版单文件 exe
+
+### 8. 表格编辑
+
+点进表格，它不再是源码，而是一张可编辑的网格：
+
+<p align="center">
+  <img src="testdata/shots/shot-table.png" alt="表格编辑：单元格网格，表头成行，边框如表格" width="720">
+</p>
+
+- **单元格就是输入框**：点哪里写哪里，每一次改动立即写回 Markdown 源码
+- **Tab / Shift-Tab** 在同一行左右移动，**回车**下移一格（在最后一行回车自动加一行）
+- **右键单元格**：上方/下方插入行、左侧/右侧插入列、删除本行/本列
+- **对齐语法原样保留**：`---`、`:--`、`:-:`、`--:` 不会因为编辑而丢失
+- 单元格里的 `|` 自动转义为 `\|`，读回时还原
+- 撤销、保存、字数统计与普通编辑完全一致
 
 ---
 
@@ -156,7 +173,7 @@ Paperly 走第三条路：**用 Go + [MyGo](https://mygo.run) 写的原生应用
 | 全文搜索 | ✅ 命中行直达 | ✅ | ✅ 更强 | ✅ | ✅ 更强 |
 | .md 文件关联 | ✅ 双平台内置 | ✅ | ✅ | ✅ | 手动配置 |
 | 插件生态 | 路线图中 | ❌ | ✅ 海量 | 弱 | ✅ 海量 |
-| 跨块字符级选区 | 块级（路线图） | ✅ | ✅ | ✅ | ✅ |
+| 跨块字符级选区 | ✅（⌥+拖动） | ✅ | ✅ | ✅ | ✅ |
 | 内存占用 | **低（原生）** | 中 | 高 | 高 | 高 |
 | 中文界面 | ✅ 原生 | ✅ | ✅ | 部分 | 语言包 |
 
@@ -169,7 +186,7 @@ Paperly 走第三条路：**用 Go + [MyGo](https://mygo.run) 写的原生应用
 
 **Paperly 的定位**：如果你想要 Typora 的手感、Obsidian 的活预览，但不想为闭源付费、不想背着两百 MB 的 Electron——这是一个单文件、几 MB、数据永远是纯 Markdown 的选择。
 
-**诚实说明 v0.1 的边界**：表格编辑、跨块字符级选区、图片拖拽导入、导出 PDF 在路线图上；没有插件系统；目前覆盖 macOS（Intel 与 Apple Silicon）、Windows（x64）与 Linux（x64 / arm64）。
+**诚实说明 v0.1 的边界**：图片拖拽导入、导出 PDF 在路线图上；没有插件系统；目前覆盖 macOS（Intel 与 Apple Silicon）、Windows（x64）与 Linux（x64 / arm64）。
 
 ---
 
@@ -191,7 +208,7 @@ Paperly 走第三条路：**用 Go + [MyGo](https://mygo.run) 写的原生应用
 
 ### Linux
 
-1. 从 [Releases](https://github.com/jiangwanying/paperly/releases) 下载 `paperly_x.y.z_amd64.deb`（x64）或 `paperly_x.y.z_arm64.deb`（arm64），Debian / Ubuntu 上执行 `sudo dpkg -i paperly_0.1.1_amd64.deb`
+1. 从 [Releases](https://github.com/jiangwanying/paperly/releases) 下载 `paperly_x.y.z_amd64.deb`（x64）或 `paperly_x.y.z_arm64.deb`（arm64），Debian / Ubuntu 上执行 `sudo dpkg -i paperly_0.1.2_amd64.deb`
 2. 其他发行版下载 `paperly-x.y.z-linux-amd64.tar.gz`（或 arm64），解压后运行里面的 `install.sh`——装到 `~/.local`，可以自更新；Arch 也能用包里的 `PKGBUILD`
 3. 窗口通过 GTK 3 绘制，桌面发行版一般已自带；Debian / Ubuntu 缺库时装 `libgtk-3-0`
 4. 想自己编译见[从源码构建](#从源码构建)
@@ -312,11 +329,11 @@ Linux 的产物在 `build/linux-<arch>/`：可执行文件 `paperly`、Debian �
 
 ## 路线图
 
-- [ ] 表格编辑（网格化单元格编辑）
-- [ ] 跨块字符级选区（整篇复制已支持，连续拖选评估中）
+- [x] 表格编辑（网格化单元格编辑）
+- [x] 跨块字符级选区（⌥ + 拖动，跨段落字符级选中、⌘C 复制）
 - [ ] 图片拖拽导入、缩放与对齐语法
 - [ ] 导出 PDF / 打印
-- [ ] 大文档性能优化（视口裁剪）
+- [x] 大文档性能优化（视口裁剪：只布局可见块，600 块的文档从 13 ms/帧降到 1.4 ms/帧）
 
 ## 常见问题
 

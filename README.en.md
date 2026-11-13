@@ -6,7 +6,7 @@
 
 The block under the caret shows its source; everything else always looks the way it will when you save.
 
-[![Version](https://img.shields.io/badge/version-0.1.1_preview-blue)](#) [![Built with MyGo](https://img.shields.io/badge/built%20with-MyGo-3B82F6)](https://mygo.run) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#build-from-source)
+[![Version](https://img.shields.io/badge/version-0.1.2_preview-blue)](#) [![Built with MyGo](https://img.shields.io/badge/built%20with-MyGo-3B82F6)](https://mygo.run) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#build-from-source)
 
 <img src="testdata/shots/promo.jpg" alt="Paperly: block-level live preview, source only where the caret is" width="880">
 
@@ -15,7 +15,7 @@ The block under the caret shows its source; everything else always looks the way
 </div>
 
 > [!IMPORTANT]
-> **Early preview (v0.1.1)** — the core writing experience is complete: live preview, item-level list editing, file management, full-text search, and `.md` associations on both platforms. The details are still being polished, and the features on the roadmap (table editing, cross-block selections, PDF export) are not here yet.
+> **Early preview (v0.1.2)** — the core writing experience is complete: live preview, item-level list editing, table editing, cross-block selections, file management, full-text search, and `.md` associations on both platforms. The details are still being polished, and the features on the roadmap (drag-and-drop images, PDF export) are not here yet.
 >
 > Found a bug, something that feels off, or a feature you want? [Open an issue](https://github.com/jiangwanying/paperly/issues); a [pull request](https://github.com/jiangwanying/paperly/pulls) is even more welcome.
 
@@ -103,6 +103,8 @@ The search field in the sidebar goes past file names:
 
 ### 6. Writing details
 
+- **Selection across blocks**: hold `⌥` and drag from the middle of one paragraph into another — character for character, across blocks; `⇧`-click or `⇧` with the arrows extend it. Viewport culling steps aside while a selection is being made, so a drag across a long document never breaks. Once made, the selection no longer needs `⌥`: `⌘A` selects all, `⌘C` copies the text as it reads (one blank line between paragraphs), and **right-clicking the selection** offers **Copy as Markdown** — with the `**`, backticks and link addresses of the source
+- Let `⌥` go and the selection stays; a click drops it, and the next one opens the paragraph's source again
 - **Find and replace**: block by block, hits highlighted (the colour is yours to choose)
 - **Outline panel**: the heading structure of the whole document, click to jump
 - **Undo**: 200 snapshots, and undo still means the right thing while editing list items
@@ -114,6 +116,21 @@ The search field in the sidebar goes past file names:
 
 - **macOS**: a dmg; `Info.plist` declares the `.md` / `.markdown` document types, so Paperly appears in Finder's "Open With" and can be made the default; double-clicking a `.md`, dropping one on the Dock icon, or passing a path on the command line all open it
 - **Windows**: an NSIS installer — choose the install folder, opt into a desktop shortcut, and `.md` associations are registered (ProgID + OpenWithProgids) and cleaned up on uninstall; a portable single-file exe comes alongside it
+
+### 8. Table editing
+
+Click into a table and it is no longer source, but a grid of cells:
+
+<p align="center">
+  <img src="testdata/shots/shot-table.png" alt="Table editing: a grid of cells, the header above them" width="720">
+</p>
+
+- **Every cell is an input**: click and write, and each change goes back into the Markdown source at once
+- **Tab / Shift-Tab** move along a row, **Return** moves down a cell (and adds a row when it is on the last one)
+- **Right-click a cell**: insert a row above or below, a column left or right, delete the row or the column
+- **Alignment survives**: `---`, `:--`, `:-:` and `--:` are kept as they were written
+- A `|` inside a cell is escaped as `\|` and read back whole
+- Undo, saving and the word count behave exactly as they do for any other block
 
 ---
 
@@ -156,7 +173,7 @@ The search field in the sidebar goes past file names:
 | Full-text search | ✅ jumps to the line | ✅ | ✅ stronger | ✅ | ✅ stronger |
 | `.md` associations | ✅ both platforms | ✅ | ✅ | ✅ | Manual |
 | Plugins | On the roadmap | ❌ | ✅ huge | Weak | ✅ huge |
-| Character-level cross-block selection | Block-level (roadmap) | ✅ | ✅ | ✅ | ✅ |
+| Character-level cross-block selection | ✅ (⌥ + drag) | ✅ | ✅ | ✅ | ✅ |
 | Memory use | **Low (native)** | Medium | High | High | High |
 | Chinese UI | ✅ built in | ✅ | ✅ | Partial | Language pack |
 
@@ -169,7 +186,7 @@ The search field in the sidebar goes past file names:
 
 **Where Paperly fits**: if you want Typora's feel and Obsidian's live preview, without paying for closed software or carrying two hundred megabytes of Electron, this is a single file of a few megabytes whose data is always plain Markdown.
 
-**An honest note on v0.1**: table editing, character-level cross-block selection, drag-and-drop images and PDF export are on the roadmap; there is no plugin system; macOS (Intel and Apple Silicon), Windows (x64) and Linux (x64 / arm64) are covered.
+**An honest note on v0.1**: drag-and-drop images and PDF export are on the roadmap; there is no plugin system; macOS (Intel and Apple Silicon), Windows (x64) and Linux (x64 / arm64) are covered.
 
 ---
 
@@ -191,7 +208,7 @@ Download from [Releases](https://github.com/jiangwanying/paperly/releases):
 
 ### Linux
 
-1. Download `paperly_x.y.z_amd64.deb` (x64) or `paperly_x.y.z_arm64.deb` (arm64) from [Releases](https://github.com/jiangwanying/paperly/releases); on Debian / Ubuntu run `sudo dpkg -i paperly_0.1.1_amd64.deb`
+1. Download `paperly_x.y.z_amd64.deb` (x64) or `paperly_x.y.z_arm64.deb` (arm64) from [Releases](https://github.com/jiangwanying/paperly/releases); on Debian / Ubuntu run `sudo dpkg -i paperly_0.1.2_amd64.deb`
 2. Elsewhere, take `paperly-x.y.z-linux-amd64.tar.gz` (or arm64) and run the `install.sh` inside it — it installs into `~/.local` and can update itself; Arch can use the `PKGBUILD` in the same archive
 3. The window is drawn through GTK 3, which desktop distributions usually ship; on Debian / Ubuntu the package is `libgtk-3-0`
 4. To compile it yourself, see [Build from source](#build-from-source)
@@ -313,11 +330,11 @@ The editor's correctness rests on **offscreen rendering tests**: `ui.Tester` dri
 
 ## Roadmap
 
-- [ ] Table editing (a grid of cells)
-- [ ] Character-level cross-block selection (copying the whole document works already; continuous drag-selection is being evaluated)
+- [x] Table editing (a grid of cells)
+- [x] Character-level cross-block selection (⌥ + drag across paragraphs, ⌘C to copy)
 - [ ] Drag-and-drop images, scaling and alignment syntax
 - [ ] PDF export and printing
-- [ ] Performance for large documents (viewport culling)
+- [x] Performance for large documents (viewport culling: only the blocks near the viewport are laid out — 13 ms down to 1.4 ms a frame on a 600-block document)
 
 ## FAQ
 

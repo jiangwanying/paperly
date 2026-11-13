@@ -188,7 +188,7 @@ func about(*mygo.MenuItem, *mygo.Window) {
 }
 
 // version is the build's, replaced when packaging.
-var version = "0.1.1"
+var version = "0.1.2"
 
 // canFormat reports whether a command that rewrites text has anywhere to
 // write: the block being edited.

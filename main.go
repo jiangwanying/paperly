@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -68,6 +69,15 @@ func adoptOldSettings(path string) {
 }
 
 func main() {
+	// A writing app holds little live data and makes a lot of per-frame
+	// garbage: with the default pacing the heap grows to twice what is
+	// alive before a cycle, which reads as a few hundred megabytes in
+	// Activity Monitor on a long document. A tighter goal spends a little
+	// idle CPU to keep the footprint down, and the soft limit keeps a
+	// burst of frames from running away before the next cycle.
+	debug.SetGCPercent(50)
+	debug.SetMemoryLimit(320 << 20)
+
 	settingsPath := ""
 	if dir, err := mygo.App.Path(mygo.PathUserData); err == nil {
 		settingsPath = filepath.Join(dir, "settings.json")

@@ -235,5 +235,12 @@
         "type": "String"
       }
     }
-  }
+  },
+  "table_row_above": "Insert Row Above",
+  "table_row_below": "Insert Row Below",
+  "table_col_left": "Insert Column Left",
+  "table_col_right": "Insert Column Right",
+  "table_delete_row": "Delete Row",
+  "table_delete_col": "Delete Column",
+  "select_mode": "Selecting · drag to pick, click to leave"
 }

@@ -1715,3 +1715,73 @@ func UpdateFailedDetail(err string) string { return In(i18n.Locale()).UpdateFail
 func (msgs Messages) UpdateFailedDetail(err string) string {
 	return Catalog.Format(msgs.locale, "update_failed_detail", map[string]any{"err": err})
 }
+
+// TableRowAbove says "在上方插入行"
+// in the language the app shows.
+func TableRowAbove() string { return In(i18n.Locale()).TableRowAbove() }
+
+// TableRowAbove says "在上方插入行"
+// in the language of msgs.
+func (msgs Messages) TableRowAbove() string {
+	return Catalog.Format(msgs.locale, "table_row_above", nil)
+}
+
+// TableRowBelow says "在下方插入行"
+// in the language the app shows.
+func TableRowBelow() string { return In(i18n.Locale()).TableRowBelow() }
+
+// TableRowBelow says "在下方插入行"
+// in the language of msgs.
+func (msgs Messages) TableRowBelow() string {
+	return Catalog.Format(msgs.locale, "table_row_below", nil)
+}
+
+// TableColLeft says "在左侧插入列"
+// in the language the app shows.
+func TableColLeft() string { return In(i18n.Locale()).TableColLeft() }
+
+// TableColLeft says "在左侧插入列"
+// in the language of msgs.
+func (msgs Messages) TableColLeft() string {
+	return Catalog.Format(msgs.locale, "table_col_left", nil)
+}
+
+// TableColRight says "在右侧插入列"
+// in the language the app shows.
+func TableColRight() string { return In(i18n.Locale()).TableColRight() }
+
+// TableColRight says "在右侧插入列"
+// in the language of msgs.
+func (msgs Messages) TableColRight() string {
+	return Catalog.Format(msgs.locale, "table_col_right", nil)
+}
+
+// TableDeleteRow says "删除本行"
+// in the language the app shows.
+func TableDeleteRow() string { return In(i18n.Locale()).TableDeleteRow() }
+
+// TableDeleteRow says "删除本行"
+// in the language of msgs.
+func (msgs Messages) TableDeleteRow() string {
+	return Catalog.Format(msgs.locale, "table_delete_row", nil)
+}
+
+// TableDeleteCol says "删除本列"
+// in the language the app shows.
+func TableDeleteCol() string { return In(i18n.Locale()).TableDeleteCol() }
+
+// TableDeleteCol says "删除本列"
+// in the language of msgs.
+func (msgs Messages) TableDeleteCol() string {
+	return Catalog.Format(msgs.locale, "table_delete_col", nil)
+}
+
+// SelectMode says "选择模式 · 拖动选中，单击退出"
+// in the language the app shows.
+func SelectMode() string { return In(i18n.Locale()).SelectMode() }
+
+// SelectMode says "选择模式 · 拖动选中，单击退出"
+// in the language of msgs.
+func (msgs Messages) SelectMode() string {
+	return Catalog.Format(msgs.locale, "select_mode", nil)
+}

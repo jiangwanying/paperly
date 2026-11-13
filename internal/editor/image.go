@@ -65,9 +65,16 @@ func (e *Editor) loadImages() {
 }
 
 // ChooseImage asks for a picture and puts it where the caret is: what the
-// menu's 图片… and the block menu's 图像 do. A picture that cannot be put in
-// says why, rather than doing nothing.
-func (e *Editor) ChooseImage() {
+// menu's 图片… does.
+func (e *Editor) ChooseImage() { e.chooseImage(-1, -1) }
+
+// chooseImage asks for a picture and puts it where the caret is, or in a
+// block of its own below block i when the menu was opened on one that is
+// not being written, or at the byte offset at when the menu was the empty
+// room's: a picture put in from a paragraph's menu stays under that
+// paragraph rather than going to the end of the text. A picture that cannot
+// be put in says why, rather than doing nothing.
+func (e *Editor) chooseImage(i, at int) {
 	win := e.win
 	go func() {
 		paths, err := mygo.Dialog.Open(mygo.OpenDialogOptions{
@@ -83,6 +90,7 @@ func (e *Editor) ChooseImage() {
 			return
 		}
 		put := func() {
+			e.startForInsert(i, at)
 			if err := e.InsertImage(paths[0]); err != nil {
 				e.imageError(err)
 			}
@@ -93,6 +101,36 @@ func (e *Editor) ChooseImage() {
 			put()
 		}
 	}()
+}
+
+// startForInsert puts the writing where a block put in from a menu goes: at
+// the caret when the menu was opened on the block being written, in a block
+// of its own below block i, at the byte offset at when the menu was the
+// empty room's, and below the block the pointer last stood on when nothing
+// is. With nothing to go by, the text goes at the end, as a new paragraph.
+func (e *Editor) startForInsert(i, at int) {
+	if i >= 0 {
+		if e.active == i {
+			return
+		}
+		if _, ok := e.doc.Block(i); ok {
+			e.startAfter(i)
+			return
+		}
+	} else if at >= 0 && !e.editing() {
+		e.startAt(at)
+		return
+	}
+	if e.editing() {
+		return
+	}
+	if e.lastBlock >= 0 {
+		if _, ok := e.doc.Block(e.lastBlock); ok {
+			e.startAfter(e.lastBlock)
+			return
+		}
+	}
+	e.StartParagraph()
 }
 
 // InsertImage puts a picture where the caret is: the file is copied into an
@@ -269,11 +307,12 @@ func (e *Editor) imageError(err error) {
 }
 
 // insertText puts s where the caret is in the block being written; with no
-// block being written, it starts a paragraph for it first.
+// block being written, it starts a paragraph for it first, below the block
+// the pointer last stood on rather than at the end of the text.
 func (e *Editor) insertText(s string) {
 	e.record()
 	if !e.editing() {
-		e.StartParagraph()
+		e.startForInsert(-1, -1)
 	}
 	if !e.editing() {
 		return

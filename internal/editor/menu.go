@@ -21,13 +21,18 @@ func headingLabels() []string {
 // words of Typora's: the clipboard, the paragraph's commands, the inline
 // formats, insertion, and the way back to the outline.
 func (e *Editor) blockMenu(c *ui.Context, m *ui.Menu, i int) {
+	// The block the pointer stood on is where a picture or a paste with no
+	// caret goes, so that the menu does not send it to the end of the text.
+	if i >= 0 {
+		e.lastBlock = i
+	}
 	// Nothing is selected while the page is read, so these are dim, as
 	// Typora's are.
 	m.Item(locales.Cut()).Disabled(true)
 	m.Item(locales.Copy()).Disabled(true)
 	if m.Item(locales.Paste()).Chosen() {
 		if text := strings.TrimSpace(c.Services().ReadClipboard()); text != "" {
-			e.insertAfter(i, text)
+			e.insertAt(e.menuAt(i), text)
 		}
 	}
 	e.menuBody(c, m, i)
@@ -60,7 +65,7 @@ func (e *Editor) menuBody(c *ui.Context, m *ui.Menu, i int) {
 
 	m.Submenu(locales.MenuParagraph(), func(s *ui.Menu) { e.paragraphItems(s, i) })
 	m.Submenu(locales.MenuFormat(), func(s *ui.Menu) { e.markItems(s, i) })
-	m.Submenu(locales.Insert(), func(s *ui.Menu) { e.insertItems(s, i) })
+	m.Submenu(locales.Insert(), func(s *ui.Menu) { e.insertItems(s, i, e.menuAt(i)) })
 	m.Separator()
 
 	if m.Item(locales.RevealInSidebar()).Chosen() {
@@ -71,20 +76,19 @@ func (e *Editor) menuBody(c *ui.Context, m *ui.Menu, i int) {
 }
 
 // canvasMenu is the menu of the empty room around the text: no paragraph
-// to change there, so it holds the clipboard and what can be put down.
-func (e *Editor) canvasMenu(c *ui.Context, m *ui.Menu) {
+// to change there, so it holds the clipboard and what can be put down, and
+// it puts them at at, the end of the room it was opened on.
+func (e *Editor) canvasMenu(c *ui.Context, m *ui.Menu, at int) {
 	if m.Item(locales.Paste()).Chosen() {
 		if text := strings.TrimSpace(c.Services().ReadClipboard()); text != "" {
-			e.startAt(len(e.doc.Source()))
-			e.draft = text
-			e.Commit()
+			e.insertAt(at, text)
 		}
 	}
 	if m.Item(locales.InsertParagraph()).Chosen() {
-		e.StartParagraph()
+		e.startAt(at)
 	}
 	m.Separator()
-	m.Submenu(locales.Insert(), func(s *ui.Menu) { e.insertItems(s, -1) })
+	m.Submenu(locales.Insert(), func(s *ui.Menu) { e.insertItems(s, -1, at) })
 	m.Separator()
 	m.Item(locales.AutoFill()).Disabled(true)
 }
@@ -131,7 +135,13 @@ func (e *Editor) paragraphItems(s *ui.Menu, i int) {
 		e.insertBefore(i)
 	}
 	if s.Item(locales.InsertParagraphBelow()).Chosen() {
-		e.InsertAfter(i)
+		// Below the paragraph being written is where it already is, so the
+		// caret stays there rather than going to the end of the text.
+		if i < 0 {
+			e.startAt(e.menuAt(i))
+		} else {
+			e.InsertAfter(i)
+		}
 	}
 	if s.Item(locales.DeleteBlock()).Chosen() {
 		e.DeleteBlock(i)
@@ -176,21 +186,45 @@ func (e *Editor) markItems(s *ui.Menu, i int) {
 	}
 }
 
-// insertItems are the blocks the menu can put below the one it opened on.
-func (e *Editor) insertItems(s *ui.Menu, i int) {
+// insertItems are the blocks the menu can put at at, the end of the room it
+// was opened on; i is the block it was opened on, -1 for the empty room.
+func (e *Editor) insertItems(s *ui.Menu, i, at int) {
 	if s.Item(locales.Image()).Chosen() {
-		e.ChooseImage()
+		e.chooseImage(i, at)
 	}
 	if s.Item(locales.InsertTable()).Chosen() {
-		e.insertAfter(i, locales.InsertTableTemplate())
+		e.insertAt(at, locales.InsertTableTemplate())
 	}
 	s.Item(locales.MathBlock()).Disabled(true)
 	if s.Item(locales.HorizontalRule()).Chosen() {
-		e.insertAfter(i, "---")
+		e.insertAt(at, "---")
 	}
 	if s.Item(locales.CodeBlock()).Chosen() {
-		e.insertAfter(i, "```\n\n```")
+		e.insertAt(at, "```\n\n```")
 	}
+}
+
+// menuAt is where a block put in from the menu of block i goes: the end of
+// that block's room, and for a menu of no block — the empty room, or the
+// paragraph being written — the room that waits for one, not the end of the
+// document.
+func (e *Editor) menuAt(i int) int {
+	if i >= 0 {
+		return e.blockEnd(i)
+	}
+	if e.pending {
+		return e.at
+	}
+	return len(e.doc.Source())
+}
+
+// blockEnd is the byte offset block i's room ends at, and the end of the
+// document when there is no such block.
+func (e *Editor) blockEnd(i int) int {
+	if b, ok := e.doc.Block(i); ok {
+		return b.End
+	}
+	return len(e.doc.Source())
 }
 
 // copyBlock puts a block's source on the clipboard.
@@ -242,20 +276,11 @@ func (e *Editor) markAtPair(i int, open, close string) {
 	})
 }
 
-// insertAfter puts text in a block of its own below block i, or at the end
-// of the document when there is no block, as while one is being written.
-func (e *Editor) insertAfter(i int, text string) {
-	if i < 0 {
-		e.startAt(len(e.doc.Source()))
-	} else {
-		e.InsertAfter(i)
-	}
-	e.draft = text
-	e.Commit()
-}
-
 // insertBefore puts an empty block above block i, ready to write in.
 func (e *Editor) insertBefore(i int) {
+	if e.editing() {
+		e.Commit()
+	}
 	b, ok := e.doc.Block(i)
 	if !ok {
 		return

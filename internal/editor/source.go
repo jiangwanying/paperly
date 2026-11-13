@@ -41,7 +41,9 @@ func (e *Editor) sourceArea(c *ui.Context, t *ui.Theme) {
 			ta.Border(0, ui.Color{})
 			ta.Background(ui.Color{})
 			ta.FocusRing(false)
-			ta.ContextMenu(func(m *ui.Menu) { e.canvasMenu(c, m) })
+			// The source is one text field, so its menu is the field's own:
+			// cut, copy, paste and select all, where the caret is.
+			ta.ContextMenu(func(m *ui.Menu) { m.EditItems() })
 			ranges := e.sourceRanges(e.sourceText, t.TextMuted, t.Text)
 			ranges = append(ranges, e.findRanges(e.sourceText, 0, e.highlightColor(), e.highlightColor())...)
 			ta.TextRanges(ranges...)
