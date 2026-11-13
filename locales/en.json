@@ -138,7 +138,7 @@
   "absolute_path": "Absolute",
   "paste_and_save": "Save pictures and insert them when pasted",
   "wrap_code": "Wrap long lines (or scroll)",
-  "note_markdown": "Math, diagrams and export are not written yet; their settings come with them.",
+  "note_markdown": "Diagrams (Mermaid) are not here yet; their settings will come with them.",
   "theme": "Theme",
   "light": "Light",
   "dark": "Dark",
@@ -242,5 +242,9 @@
   "table_col_right": "Insert Column Right",
   "table_delete_row": "Delete Row",
   "table_delete_col": "Delete Column",
-  "select_mode": "Selecting · drag to pick, click to leave"
+  "select_mode": "Selecting · drag to pick, click to leave",
+  "export_pdf": "Export as PDF…",
+  "export_failed": "Could not export the PDF",
+  "math_render": "Maths",
+  "math_render_on": "Render inline and display formulas"
 }

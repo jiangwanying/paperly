@@ -26,6 +26,7 @@ type App struct {
 
 	findWell    ui.Color           // the search color the settings' well shows, whole
 	prefs       *mygo.Window       // the preferences window, while it is open
+	about       *mygo.Window       // the about panel, while it is open
 	trash       func(string) error // the wastebasket, which a test takes in hand
 	prefsParent *mygo.Window       // the window it was opened from
 	prefsTab    string             // the category it shows

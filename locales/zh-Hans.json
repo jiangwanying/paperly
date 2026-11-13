@@ -138,7 +138,7 @@
   "absolute_path": "绝对路径",
   "paste_and_save": "粘贴时保存图片并插入",
   "wrap_code": "自动换行（否则横向滚动）",
-  "note_markdown": "公式、图表与导出尚未实现，它们的设置等做了再加。",
+  "note_markdown": "图表（Mermaid）尚未实现，它的设置等做了再加。",
   "theme": "主题",
   "light": "浅色",
   "dark": "深色",
@@ -242,5 +242,9 @@
   "table_col_right": "在右侧插入列",
   "table_delete_row": "删除本行",
   "table_delete_col": "删除本列",
-  "select_mode": "选择模式 · 拖动选中，单击退出"
+  "select_mode": "选择模式 · 拖动选中，单击退出",
+  "export_pdf": "导出 PDF…",
+  "export_failed": "PDF 导出失败",
+  "math_render": "数学公式",
+  "math_render_on": "渲染行内与块级公式"
 }

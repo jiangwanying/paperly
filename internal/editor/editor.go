@@ -87,17 +87,19 @@ type Editor struct {
 	zoomAddr  string // the picture the veil over the page shows
 	zoomCache map[string]ui.ImageSource
 
-	tbl       table           // the table being written, when the block is one
-	heights   map[int]float32 // how tall each block was, from the frame it was laid out
-	cullN     int             // the block count those heights belong to
-	cullW     float32         // the text measure they were taken at
-	cullSize  float32         // the font size they were taken at
-	laid      int             // blocks laid out, for the tests to watch
-	lastBlock int             // the block the pointer last stood on, -1 for none
-	canvasY   float32         // where the pointer last was over the page, in its own coordinates
-	testMod   ui.Modifiers    // a modifier a test holds, the pointer's presses carrying none
-	pageSel   int             // the parts of the page's selection, from the last frame
-	selMode   bool            // the page is selecting, as of this frame
+	tbl       table               // the table being written, when the block is one
+	heights   map[int]float32     // how tall each block was, from the frame it was laid out
+	cullN     int                 // the block count those heights belong to
+	cullW     float32             // the text measure they were taken at
+	cullSize  float32             // the font size they were taken at
+	laid      int                 // blocks laid out, for the tests to watch
+	lastBlock int                 // the block the pointer last stood on, -1 for none
+	canvasY   float32             // where the pointer last was over the page, in its own coordinates
+	testMod   ui.Modifiers        // a modifier a test holds, the pointer's presses carrying none
+	pageSel   int                 // the parts of the page's selection, from the last frame
+	selMode   bool                // the page is selecting, as of this frame
+	mathCache map[mathKey]mathPic // the formulas drawn, by their TeX
+	mathText  ui.Color            // the color the page's text has, for its formulas
 	dbgPress  bool
 	dbgSel    string
 }
@@ -133,6 +135,9 @@ func (e *Editor) Path() string { return e.path() }
 
 // Doc is the document the editor shows.
 func (e *Editor) Doc() *doc.Doc { return e.doc }
+
+// Shared is the look and the settings every window of the app draws with.
+func (e *Editor) Shared() *Shared { return e.sh }
 
 // Active is the block being edited, or -1.
 func (e *Editor) Active() int { return e.active }
@@ -485,6 +490,23 @@ func (e *Editor) splitAtCaret() {
 	if strings.Contains(e.draft, "\n") && strings.HasPrefix(strings.TrimLeft(e.draft, " \t"), "```") {
 		e.draft = e.draft[:at] + "\n" + e.draft[at:]
 		e.sync()
+		return
+	}
+	// Return inside a formula adds a line to its TeX, as it does in a code
+	// block: the fences go with the draft.
+	if strings.Contains(e.draft, "\n") && strings.HasPrefix(strings.TrimLeft(e.draft, " \t"), "$$") {
+		e.draft = e.draft[:at] + "\n" + e.draft[at:]
+		e.sync()
+		e.caret = doc.RuneOffset(e.draft, at+1)
+		return
+	}
+	// Return after $$ on a line of its own opens a formula, with the caret
+	// inside it.
+	if strings.TrimSpace(e.draft) == "$$" {
+		e.record()
+		e.draft = "$$\n\n$$"
+		e.sync()
+		e.caret = doc.RuneOffset(e.draft, 3)
 		return
 	}
 	// Return after ``` or ```lang on a line of its own opens the body of a
@@ -840,19 +862,45 @@ func (e *Editor) ToggleSidebar() { e.sh.Toggle() }
 // ShowSide opens one of the panels at the left.
 func (e *Editor) ShowSide(m SideMode) { e.sh.Show(m) }
 
-// View builds the window: the panel at the left if one shows, the page, and
-// the bar under it.
-func (e *Editor) View(c *ui.Context) {
+// ensureTheme builds the page's look and the view's options—the theme, the
+// formula renderers, the syntax the text is read with—once for each style,
+// and answers the theme of the frame. The export draws pages without a
+// window, and asks for the same look here.
+func (e *Editor) ensureTheme(c *ui.Context) *ui.Theme {
 	t := e.sh.Look(c.Theme())
+	e.mathText = t.Text
 	if e.ui == nil || e.style != e.sh.Style {
 		md, ut := documentTheme(t, e.sh)
 		e.style = e.sh.Style
 		// The view leaves the pointer alone: a click on a paragraph enters
 		// editing rather than starting a selection of its own.
 		e.md = markdown.Options{Theme: md, ShareSelection: true, WrapCode: e.sh.WrapCode}
+		if e.sh.Math {
+			// A formula is drawn as a picture by internal/math, at the
+			// size and color the page has it in. $x$ within a line of
+			// text is an object of the text, set at the size of the words
+			// around it.
+			e.md.Math = func(c *ui.Context, tex string) { e.mathBlock(c, tex) }
+			e.md.InlineMath = func(tex string, size float32) (markdown.InlineObject, bool) {
+				return e.inlineMath(tex, size)
+			}
+			// TeX between single dollars, as $x^2$, is math: without the
+			// extension the dollars read as ordinary characters.
+			e.md.Extensions = parser.Default | parser.ExtDollarMath
+		} else {
+			// The formulas show as their TeX, and the dollars stay dollars.
+			e.md.Extensions = parser.Default
+		}
 		e.mdBase, e.mdMark = md, nil
 		e.ui = ut
 	}
+	return t
+}
+
+// View builds the window: the panel at the left if one shows, the page, and
+// the bar under it.
+func (e *Editor) View(c *ui.Context) {
+	t := e.ensureTheme(c)
 	e.markTheme()
 	e.svc = c.Services()
 	e.loadImages()

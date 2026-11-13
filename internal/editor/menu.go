@@ -114,7 +114,9 @@ func (e *Editor) paragraphItems(s *ui.Menu, i int) {
 	if s.Item(locales.CodeBlock()).Chosen() {
 		e.applyTo(i, doc.ToggleCode)
 	}
-	s.Item(locales.MathBlock()).Disabled(true)
+	if s.Item(locales.MathBlock()).Chosen() {
+		e.insertFormula(e.menuAt(i))
+	}
 	if s.Item(locales.Quote()).Chosen() {
 		e.applyTo(i, doc.ToggleQuote)
 	}
@@ -195,13 +197,38 @@ func (e *Editor) insertItems(s *ui.Menu, i, at int) {
 	if s.Item(locales.InsertTable()).Chosen() {
 		e.insertAt(at, locales.InsertTableTemplate())
 	}
-	s.Item(locales.MathBlock()).Disabled(true)
+	if s.Item(locales.MathBlock()).Chosen() {
+		e.insertFormula(at)
+	}
 	if s.Item(locales.HorizontalRule()).Chosen() {
 		e.insertAt(at, "---")
 	}
 	if s.Item(locales.CodeBlock()).Chosen() {
 		e.insertAt(at, "```\n\n```")
 	}
+}
+
+// insertFormula puts a formula where the menu was opened, and opens it for
+// writing with the caret inside its TeX: a formula is written more often
+// than it is read the first time.
+func (e *Editor) insertFormula(at int) {
+	e.startAt(at)
+	e.draft = "$$\n\n$$"
+	e.Commit()
+	// The formula just put in is the last one that starts before the text
+	// written ends: the block spans may leave the blank line between its
+	// walls out.
+	i := -1
+	for k, b := range e.doc.Blocks() {
+		if b.Kind == parser.MathBlock && b.Start <= e.wrote {
+			i = k
+		}
+	}
+	if i < 0 {
+		return
+	}
+	e.Activate(i)
+	e.caret = doc.RuneOffset(e.draft, 3) // after "$$\n"
 }
 
 // menuAt is where a block put in from the menu of block i goes: the end of

@@ -6,7 +6,7 @@
 
 光标落在哪里，哪里就露出源码；其余部分始终是你保存后看到的样子。
 
-[![Version](https://img.shields.io/badge/version-0.1.2_preview-blue)](#) [![Built with MyGo](https://img.shields.io/badge/built%20with-MyGo-3B82F6)](https://mygo.run) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#从源码构建)
+[![Version](https://img.shields.io/badge/version-0.1.3_preview-blue)](#) [![Built with MyGo](https://img.shields.io/badge/built%20with-MyGo-3B82F6)](https://mygo.run) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#从源码构建)
 
 <img src="testdata/shots/promo.jpg" alt="Paperly：块级活预览，光标处才露出源码" width="880">
 
@@ -15,7 +15,7 @@
 </div>
 
 > [!IMPORTANT]
-> **当前为早期预览版（v0.1.2）**——核心写作体验已经完整：活预览、条目级编辑、表格编辑、跨块选区、文件管理、全文搜索、双平台 `.md` 关联。但细节仍在打磨，路线图上的功能（图片拖拽导入、导出 PDF）尚未落地。
+> **当前为早期预览版（v0.1.3）**——核心写作体验已经完整：活预览、条目级编辑、表格编辑、数学公式、跨块选区、导出 PDF、文件管理、全文搜索、双平台 `.md` 关联。但细节仍在打磨，路线图上的功能（图片拖拽导入）尚未落地。
 >
 > 遇到 bug、不顺手的地方，或者想要的功能，欢迎 [提 Issue](https://github.com/jiangwanying/paperly/issues)；想直接动手修，[提 PR](https://github.com/jiangwanying/paperly/pulls) 更受欢迎。
 
@@ -103,8 +103,18 @@ Paperly 走第三条路：**用 Go + [MyGo](https://mygo.run) 写的原生应用
 
 ### 6. 写作细节
 
+- **数学公式**：`$ … $` 行内、`$$ … $$` 独立成块，都用内置的原生排版画出来（没有 MathJax，没有 WebView）——分式、上下标、根号、求和与积分（含上下限）、可伸缩括号、矩阵与行列式（`matrix` / `pmatrix` / `bmatrix` / `vmatrix` 等）、分段函数（`cases`）、多行对齐（`aligned` / `align`，`align` 自带行号）、希腊字母、`\text{}` 里的正体文字与中文（内嵌思源宋体子集，覆盖 GB2312 常用字，SIL OFL 1.1，见 `internal/math/fonts/OFL.txt`），按 TeX 的间距规则摆放。行内公式按周围文字的字号排版、贴在基线上，跟着句子换行，不撑开行距；块级公式居中独立成段，字号更大、`∑` 的上下限摆在符号上下。点进公式显示 TeX 源码，光标离开立刻变回排版结果；菜单「段落 / 插入 → 公式块」新建
+
+<p align="center">
+  <img src="testdata/shots/shot-math.png" alt="数学公式：行内与块级 TeX 由内置排版引擎画出来" width="720">
+</p>
+
+<p align="center">
+  <img src="testdata/shots/shot-math-env.png" alt="矩阵、行列式、分段函数与多行对齐" width="700">
+</p>
 - **跨块选区**：按住 `⌥` 拖动，可以从一段中间选到另一段中间，字符级、跨块；`⇧` 点按或 `⇧` + 方向键继续扩展；长文档拖选时自动临时关闭视口裁剪，整篇拖选不中断。选区建好后就不再需要 `⌥`：`⌘A` 全选、`⌘C` 复制为纯文本（段落间以空行分隔）；**右键选区**还可以「复制为 Markdown」——带 `**`、`` ` ``、链接地址等源码标记
 - 松开 `⌥` 选区仍在；单击一下收掉选区，再点段落就回到改源码的编辑态
+- **导出 PDF**：`文件 → 导出 PDF…`（`⇧⌘E`），A4 版式、按块分页（不会把一行切成两页）、页脚页码、标题自动成为 PDF 书签，导出后在访达里定位文件。整页按打印分辨率渲染，所以和屏幕上看到的完全一致；代价是文字暂不可选不可搜
 - **查找替换**：逐块定位、命中高亮（高亮颜色可自定义）
 - **大纲面板**：列出全文标题结构，点击直达对应位置
 - **撤销**：200 步快照，撤销语义在列表条目编辑中也保持正确
@@ -186,7 +196,7 @@ Paperly 走第三条路：**用 Go + [MyGo](https://mygo.run) 写的原生应用
 
 **Paperly 的定位**：如果你想要 Typora 的手感、Obsidian 的活预览，但不想为闭源付费、不想背着两百 MB 的 Electron——这是一个单文件、几 MB、数据永远是纯 Markdown 的选择。
 
-**诚实说明 v0.1 的边界**：图片拖拽导入、导出 PDF 在路线图上；没有插件系统；目前覆盖 macOS（Intel 与 Apple Silicon）、Windows（x64）与 Linux（x64 / arm64）。
+**诚实说明 v0.1 的边界**：图片拖拽导入在路线图上；没有插件系统；目前覆盖 macOS（Intel 与 Apple Silicon）、Windows（x64）与 Linux（x64 / arm64）。
 
 ---
 
@@ -208,7 +218,7 @@ Paperly 走第三条路：**用 Go + [MyGo](https://mygo.run) 写的原生应用
 
 ### Linux
 
-1. 从 [Releases](https://github.com/jiangwanying/paperly/releases) 下载 `paperly_x.y.z_amd64.deb`（x64）或 `paperly_x.y.z_arm64.deb`（arm64），Debian / Ubuntu 上执行 `sudo dpkg -i paperly_0.1.2_amd64.deb`
+1. 从 [Releases](https://github.com/jiangwanying/paperly/releases) 下载 `paperly_x.y.z_amd64.deb`（x64）或 `paperly_x.y.z_arm64.deb`（arm64），Debian / Ubuntu 上执行 `sudo dpkg -i paperly_0.1.3_amd64.deb`
 2. 其他发行版下载 `paperly-x.y.z-linux-amd64.tar.gz`（或 arm64），解压后运行里面的 `install.sh`——装到 `~/.local`，可以自更新；Arch 也能用包里的 `PKGBUILD`
 3. 窗口通过 GTK 3 绘制，桌面发行版一般已自带；Debian / Ubuntu 缺库时装 `libgtk-3-0`
 4. 想自己编译见[从源码构建](#从源码构建)
@@ -331,8 +341,11 @@ Linux 的产物在 `build/linux-<arch>/`：可执行文件 `paperly`、Debian �
 
 - [x] 表格编辑（网格化单元格编辑）
 - [x] 跨块字符级选区（⌥ + 拖动，跨段落字符级选中、⌘C 复制）
+- [x] 数学公式（行内 `$…$` 与块级 `$$ … $$`，原生排版，无 WebView / MathJax）
+- [x] 矩阵、行列式、`cases` 分段函数、`aligned` / `align` 多行对齐
+- [ ] AMS 冷门环境（`tikzcd`、`alignat` 等）
 - [ ] 图片拖拽导入、缩放与对齐语法
-- [ ] 导出 PDF / 打印
+- [x] 导出 PDF（A4，所见即所得：整页按屏幕渲染装入 PDF，含页码与标题书签；文字暂不可选——真文本排版在路线图上）
 - [x] 大文档性能优化（视口裁剪：只布局可见块，600 块的文档从 13 ms/帧降到 1.4 ms/帧）
 
 ## 常见问题

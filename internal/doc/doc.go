@@ -22,6 +22,31 @@ type Block struct {
 	Line  int // the 1-based line its first byte is on
 }
 
+// mathBlockEnd is where a formula's block ends: the fence that closes it,
+// when the lines after end open one, and end itself when none does.
+func mathBlockEnd(src string, end int) int {
+	pos := end
+	for pos < len(src) {
+		line := src[pos:]
+		if i := strings.IndexByte(line, '\n'); i >= 0 {
+			line = line[:i]
+		}
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "$$" || trimmed == `\]` {
+			return pos + len(strings.TrimRight(line, " \t"))
+		}
+		if trimmed != "" && !strings.HasPrefix(trimmed, `\`) {
+			break
+		}
+		if i := strings.IndexByte(src[pos:], '\n'); i >= 0 {
+			pos += i + 1
+			continue
+		}
+		break
+	}
+	return end
+}
+
 // Doc is a document: its source, the parse of it, and its top-level blocks.
 type Doc struct {
 	src    string
@@ -143,9 +168,16 @@ func (d *Doc) refresh() {
 			line += strings.Count(d.src[pos:b.Start], "\n")
 			pos = b.Start
 		}
+		end := b.End
+		if b.Kind == parser.MathBlock {
+			// A formula's block ends at its last line of TeX: the fence
+			// that closes it is the writer's too, and goes with it when
+			// the block is edited as a whole.
+			end = mathBlockEnd(d.src, b.End)
+		}
 		d.blocks = append(d.blocks, Block{
 			Index: i,
-			Span:  Span{Start: b.Start, End: b.End},
+			Span:  Span{Start: b.Start, End: end},
 			Kind:  b.Kind,
 			Level: b.Level,
 			Line:  line,

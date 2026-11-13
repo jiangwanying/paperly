@@ -33,6 +33,9 @@ func (a *App) menuItems() []*mygo.MenuItem {
 		{Role: mygo.RoleSaveAs, Accelerator: "Shift+CmdOrCtrl+S"},
 		{Role: mygo.RoleRevert},
 		mygo.Separator(),
+		{ID: "file.pdf", Label: locales.ExportPdf(), Accelerator: "Shift+CmdOrCtrl+E",
+			Click: func(_ *mygo.MenuItem, win *mygo.Window) { a.exportPDF(win) }},
+		mygo.Separator(),
 		{Role: mygo.RoleRename},
 		{Role: mygo.RoleMoveTo},
 		mygo.Separator(),
@@ -133,7 +136,7 @@ func (a *App) menuItems() []*mygo.MenuItem {
 			{Label: locales.Language(), Submenu: a.languageItems()},
 		}},
 		{Label: locales.MenuHelp(), Submenu: []*mygo.MenuItem{
-			{ID: "help.about", Label: locales.About(), Click: about},
+			{ID: "help.about", Label: locales.About(), Click: a.showAbout},
 			{ID: "help.update", Label: locales.CheckUpdates(), Click: func(*mygo.MenuItem, *mygo.Window) { checkForUpdates() }},
 			mygo.Separator(),
 			{ID: "help.keys", Label: locales.Shortcuts(), Disabled: true},
@@ -165,30 +168,8 @@ func (a *App) languageItems() []*mygo.MenuItem {
 	}
 }
 
-// about shows the app's name, its version and where it lives on GitHub;
-// the buttons open the repository and run the update check.
-func about(*mygo.MenuItem, *mygo.Window) {
-	go func() {
-		r, err := mygo.Dialog.Message(mygo.MessageOptions{
-			Title:   "Paperly",
-			Message: "Paperly " + version,
-			Detail:  locales.AboutDetail() + "\n\n" + locales.GithubRepoLabel() + ": " + repoURL,
-			Buttons: []string{locales.OpenGithub(), locales.CheckUpdates(), locales.Ok()},
-		})
-		if err != nil {
-			return
-		}
-		switch r.Button {
-		case 0:
-			openURL(repoURL)
-		case 1:
-			checkForUpdates()
-		}
-	}()
-}
-
 // version is the build's, replaced when packaging.
-var version = "0.1.2"
+var version = "0.1.3"
 
 // canFormat reports whether a command that rewrites text has anywhere to
 // write: the block being edited.

@@ -75,6 +75,10 @@ func (a *App) OpenSettings(win *mygo.Window) {
 		Parent:            win,
 		Content:           ui.View(a.settingsView),
 	})
+	// The panel has no menu of its own. On Windows and Linux a window
+	// otherwise wears the app's, as if the settings were a document; an
+	// empty menu is how it is given none, since nil means "the app's".
+	w.SetMenu(mygo.NewMenu(nil))
 	w.OnClosed(func() { a.prefs = nil })
 	a.prefs = w
 	a.prefsParent = win
@@ -167,7 +171,7 @@ func (a *App) paneFields(id string) []string {
 		return []string{locales.ImageWhen(), locales.ImageLocation(), locales.ImagePath(),
 			locales.RelativePath(), locales.AbsolutePath(), locales.PasteImage()}
 	case "markdown":
-		return []string{locales.CodeBlock(), locales.WrapCode()}
+		return []string{locales.CodeBlock(), locales.WrapCode(), locales.MathRender(), locales.MathRenderOn()}
 	case "appearance":
 		return []string{locales.Theme(), locales.Light(), locales.Dark(), locales.LangSystem(),
 			locales.Custom(), locales.ColorBg(), locales.ColorText(), locales.ColorAccent(),
@@ -219,6 +223,10 @@ func (a *App) settingsPane(c *ui.Context, t *ui.Theme) {
 		a.paneTitle(c, t, "Markdown")
 		a.paneGroup(c, t, locales.CodeBlock(), func() {
 			a.checkRow(c, t, locales.WrapCode(), a.set.WrapCode, func(v bool) { a.setWrapCode(v) })
+		})
+		a.paneGroup(c, t, locales.MathRender(), func() {
+			a.checkRow(c, t, locales.MathRenderOn(), a.set.Math == nil || *a.set.Math,
+				func(v bool) { a.setMath(v) })
 		})
 		a.paneNote(c, t, locales.NoteMarkdown())
 	case "appearance":
@@ -687,6 +695,14 @@ func (a *App) setSideIcon(v float32) {
 func (a *App) setWrapCode(v bool) {
 	a.set.WrapCode = v
 	a.shared.SetWrapCode(v)
+	a.saver.touch()
+}
+
+// setMath turns the rendering of formulas on or off, for the documents that
+// write about prices rather than physics.
+func (a *App) setMath(v bool) {
+	a.set.Math = &v
+	a.shared.SetMath(v)
 	a.saver.touch()
 }
 

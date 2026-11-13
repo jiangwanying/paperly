@@ -38,6 +38,9 @@ type Shared struct {
 
 	// WrapCode wraps long lines of code blocks instead of scrolling them.
 	WrapCode bool
+	// Math renders the formulas of a page; a document about prices may
+	// want it off, so that $5 is not read as a formula.
+	Math bool
 	// ImageDir is where an inserted picture is copied: "assets" for a folder
 	// beside the document, "same" for the document's own.
 	ImageDir string
@@ -124,7 +127,7 @@ func NewShared() *Shared {
 		Measure: 860, Size: 16, LineHeight: 1.6,
 		SideWidth: 270, Theme: "auto",
 		SideFont: 14, SideIcon: 15,
-		ShowStatusBar: true, ReadingSpeed: 400,
+		ShowStatusBar: true, ReadingSpeed: 400, Math: true,
 		Custom: DefaultCustomTheme(), FindColor: "pink",
 		FindCustom: ui.RGBA(255, 120, 180, 0.55),
 	}
@@ -334,6 +337,16 @@ func (sh *Shared) SetWrapCode(wrap bool) {
 		return
 	}
 	sh.WrapCode = wrap
+	sh.Style++
+}
+
+// SetMath turns the rendering of formulas on or off, and restyles the
+// windows: what was a formula shows as its source until it is back on.
+func (sh *Shared) SetMath(on bool) {
+	if sh.Math == on {
+		return
+	}
+	sh.Math = on
 	sh.Style++
 }
 

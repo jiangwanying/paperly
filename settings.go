@@ -40,6 +40,9 @@ type Settings struct {
 	OpenInNewWindow bool `json:"openInNewWindow"`
 	// WrapCode wraps long lines of code blocks instead of scrolling them.
 	WrapCode bool `json:"wrapCode"`
+	// Math renders formulas: $x$ within a line, $$ … $$ on their own. Nil
+	// is on, as documents written before the setting have no word of it.
+	Math *bool `json:"math"`
 	// ImageDir is where an inserted picture is copied: "assets" for a folder
 	// beside the document, or "same" for the document's own folder.
 	ImageDir string `json:"imageDir"`

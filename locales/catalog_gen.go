@@ -1184,11 +1184,11 @@ func (msgs Messages) WrapCode() string {
 	return Catalog.Format(msgs.locale, "wrap_code", nil)
 }
 
-// NoteMarkdown says "公式、图表与导出尚未实现，它们的设置等做了再加。"
+// NoteMarkdown says "图表（Mermaid）尚未实现，它的设置等做了再加。"
 // in the language the app shows.
 func NoteMarkdown() string { return In(i18n.Locale()).NoteMarkdown() }
 
-// NoteMarkdown says "公式、图表与导出尚未实现，它们的设置等做了再加。"
+// NoteMarkdown says "图表（Mermaid）尚未实现，它的设置等做了再加。"
 // in the language of msgs.
 func (msgs Messages) NoteMarkdown() string {
 	return Catalog.Format(msgs.locale, "note_markdown", nil)
@@ -1784,4 +1784,44 @@ func SelectMode() string { return In(i18n.Locale()).SelectMode() }
 // in the language of msgs.
 func (msgs Messages) SelectMode() string {
 	return Catalog.Format(msgs.locale, "select_mode", nil)
+}
+
+// ExportPdf says "导出 PDF…"
+// in the language the app shows.
+func ExportPdf() string { return In(i18n.Locale()).ExportPdf() }
+
+// ExportPdf says "导出 PDF…"
+// in the language of msgs.
+func (msgs Messages) ExportPdf() string {
+	return Catalog.Format(msgs.locale, "export_pdf", nil)
+}
+
+// ExportFailed says "PDF 导出失败"
+// in the language the app shows.
+func ExportFailed() string { return In(i18n.Locale()).ExportFailed() }
+
+// ExportFailed says "PDF 导出失败"
+// in the language of msgs.
+func (msgs Messages) ExportFailed() string {
+	return Catalog.Format(msgs.locale, "export_failed", nil)
+}
+
+// MathRender says "数学公式"
+// in the language the app shows.
+func MathRender() string { return In(i18n.Locale()).MathRender() }
+
+// MathRender says "数学公式"
+// in the language of msgs.
+func (msgs Messages) MathRender() string {
+	return Catalog.Format(msgs.locale, "math_render", nil)
+}
+
+// MathRenderOn says "渲染行内与块级公式"
+// in the language the app shows.
+func MathRenderOn() string { return In(i18n.Locale()).MathRenderOn() }
+
+// MathRenderOn says "渲染行内与块级公式"
+// in the language of msgs.
+func (msgs Messages) MathRenderOn() string {
+	return Catalog.Format(msgs.locale, "math_render_on", nil)
 }

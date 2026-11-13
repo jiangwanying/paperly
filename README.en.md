@@ -6,7 +6,7 @@
 
 The block under the caret shows its source; everything else always looks the way it will when you save.
 
-[![Version](https://img.shields.io/badge/version-0.1.2_preview-blue)](#) [![Built with MyGo](https://img.shields.io/badge/built%20with-MyGo-3B82F6)](https://mygo.run) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#build-from-source)
+[![Version](https://img.shields.io/badge/version-0.1.3_preview-blue)](#) [![Built with MyGo](https://img.shields.io/badge/built%20with-MyGo-3B82F6)](https://mygo.run) [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](#) [![License](https://img.shields.io/badge/license-MIT-green)](#) [![Tests](https://img.shields.io/badge/tests-go%20test%20.%2F...-success)](#build-from-source)
 
 <img src="testdata/shots/promo.jpg" alt="Paperly: block-level live preview, source only where the caret is" width="880">
 
@@ -15,7 +15,7 @@ The block under the caret shows its source; everything else always looks the way
 </div>
 
 > [!IMPORTANT]
-> **Early preview (v0.1.2)** — the core writing experience is complete: live preview, item-level list editing, table editing, cross-block selections, file management, full-text search, and `.md` associations on both platforms. The details are still being polished, and the features on the roadmap (drag-and-drop images, PDF export) are not here yet.
+> **Early preview (v0.1.3)** — the core writing experience is complete: live preview, item-level list editing, table editing, maths, cross-block selections, PDF export, file management, full-text search, and `.md` associations on both platforms. The details are still being polished, and the features on the roadmap (drag-and-drop images) are not here yet.
 >
 > Found a bug, something that feels off, or a feature you want? [Open an issue](https://github.com/jiangwanying/paperly/issues); a [pull request](https://github.com/jiangwanying/paperly/pulls) is even more welcome.
 
@@ -103,8 +103,10 @@ The search field in the sidebar goes past file names:
 
 ### 6. Writing details
 
+- **Maths**: `$ … $` within a line and `$$ … $$` on a line of its own are typeset by a small native renderer of our own — no MathJax, no WebView — fractions, scripts, roots, sums and integrals with their limits, fences that grow, matrices and determinants (`matrix`, `pmatrix`, `bmatrix`, `vmatrix` …), piecewise functions (`cases`), aligned lines (`aligned` / `align`, the latter numbered), Greek, upright text and Chinese in `\text{}` (a subset of Noto Serif SC travels with the app, SIL OFL 1.1, see `internal/math/fonts/OFL.txt`), spaced the way TeX spaces them. Inline formulas take the size of the words around them, sit on the baseline and flow with the line; display formulas stand alone, centred, larger, with a sum's limits above and below it. Click a formula and its TeX shows; move the caret away and the picture comes back. **Paragraph / Insert → Formula block** makes one
 - **Selection across blocks**: hold `⌥` and drag from the middle of one paragraph into another — character for character, across blocks; `⇧`-click or `⇧` with the arrows extend it. Viewport culling steps aside while a selection is being made, so a drag across a long document never breaks. Once made, the selection no longer needs `⌥`: `⌘A` selects all, `⌘C` copies the text as it reads (one blank line between paragraphs), and **right-clicking the selection** offers **Copy as Markdown** — with the `**`, backticks and link addresses of the source
 - Let `⌥` go and the selection stays; a click drops it, and the next one opens the paragraph's source again
+- **PDF export**: `File → Export as PDF…` (`⇧⌘E`) — A4, pages broken between blocks so no line is cut in two, page numbers in the foot, headings as bookmarks, and the folder revealed afterwards. Pages are drawn at print resolution, so what you get is exactly what the screen shows; the trade is that the text is not yet selectable or searchable
 - **Find and replace**: block by block, hits highlighted (the colour is yours to choose)
 - **Outline panel**: the heading structure of the whole document, click to jump
 - **Undo**: 200 snapshots, and undo still means the right thing while editing list items
@@ -186,7 +188,7 @@ Click into a table and it is no longer source, but a grid of cells:
 
 **Where Paperly fits**: if you want Typora's feel and Obsidian's live preview, without paying for closed software or carrying two hundred megabytes of Electron, this is a single file of a few megabytes whose data is always plain Markdown.
 
-**An honest note on v0.1**: drag-and-drop images and PDF export are on the roadmap; there is no plugin system; macOS (Intel and Apple Silicon), Windows (x64) and Linux (x64 / arm64) are covered.
+**An honest note on v0.1**: drag-and-drop images are on the roadmap; there is no plugin system; macOS (Intel and Apple Silicon), Windows (x64) and Linux (x64 / arm64) are covered.
 
 ---
 
@@ -208,7 +210,7 @@ Download from [Releases](https://github.com/jiangwanying/paperly/releases):
 
 ### Linux
 
-1. Download `paperly_x.y.z_amd64.deb` (x64) or `paperly_x.y.z_arm64.deb` (arm64) from [Releases](https://github.com/jiangwanying/paperly/releases); on Debian / Ubuntu run `sudo dpkg -i paperly_0.1.2_amd64.deb`
+1. Download `paperly_x.y.z_amd64.deb` (x64) or `paperly_x.y.z_arm64.deb` (arm64) from [Releases](https://github.com/jiangwanying/paperly/releases); on Debian / Ubuntu run `sudo dpkg -i paperly_0.1.3_amd64.deb`
 2. Elsewhere, take `paperly-x.y.z-linux-amd64.tar.gz` (or arm64) and run the `install.sh` inside it — it installs into `~/.local` and can update itself; Arch can use the `PKGBUILD` in the same archive
 3. The window is drawn through GTK 3, which desktop distributions usually ship; on Debian / Ubuntu the package is `libgtk-3-0`
 4. To compile it yourself, see [Build from source](#build-from-source)
@@ -332,8 +334,11 @@ The editor's correctness rests on **offscreen rendering tests**: `ui.Tester` dri
 
 - [x] Table editing (a grid of cells)
 - [x] Character-level cross-block selection (⌥ + drag across paragraphs, ⌘C to copy)
+- [x] Maths (inline `$…$` and display `$$ … $$`, typeset natively — no WebView, no MathJax)
+- [x] Matrices and determinants, `cases`, `aligned` / `align`
+- [ ] Rarer AMS environments (`tikzcd`, `alignat` …)
 - [ ] Drag-and-drop images, scaling and alignment syntax
-- [ ] PDF export and printing
+- [x] PDF export (A4, WYSIWYG: each page is drawn as the screen draws it, with page numbers and heading bookmarks; the text is not yet selectable — real text layout is on the roadmap)
 - [x] Performance for large documents (viewport culling: only the blocks near the viewport are laid out — 13 ms down to 1.4 ms a frame on a 600-block document)
 
 ## FAQ

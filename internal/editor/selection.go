@@ -37,8 +37,13 @@ func (e *Editor) selectable(col ui.Element) ui.Element {
 // copySelection is what Copy puts on the clipboard for a selection made
 // across blocks: each paragraph's text, set apart from the next by a blank
 // line, as the page reads. What was selected is what is copied — the marks
-// of the source are not in it, as they are not on the page.
+// of the source are not in it, as they are not on the page. A formula is
+// the exception: it is copied as its source, $…$, since the picture it
+// stands as is not text at all.
 func (e *Editor) copySelection(parts []ui.SelectedText) transfer.Data {
+	src := e.doc.Source()
+	var segs []mdSeg
+	at := 0
 	var b strings.Builder
 	for i, p := range parts {
 		if i > 0 {
@@ -46,9 +51,54 @@ func (e *Editor) copySelection(parts []ui.SelectedText) transfer.Data {
 			// the blank line is what sets the blocks of the page apart.
 			b.WriteString("\n\n")
 		}
-		b.WriteString(partText(p))
+		text := partText(p)
+		if strings.ContainsRune(text, objectChar) {
+			if segs == nil {
+				segs = e.sourceSegments()
+			}
+			var k int
+			text, k = withSources(src, segs, p, at)
+			at = k + 1
+		}
+		b.WriteString(text)
 	}
 	return transfer.TextData(b.String())
+}
+
+// objectChar is the rune a formula stands as in a paragraph's text.
+const objectChar = '\uFFFC'
+
+// withSources is a part's text with each formula it holds written as its
+// source, $…$, and the paragraph it was found in, for the parts that follow
+// to be looked for after it. A part no paragraph shows keeps its text.
+func withSources(src string, segs []mdSeg, p ui.SelectedText, from int) (string, int) {
+	i := -1
+	for k := from; k < len(segs); k++ {
+		if segs[k].text == p.Text {
+			i = k
+			break
+		}
+	}
+	if i < 0 {
+		return partText(p), from
+	}
+	r := []rune(p.Text)
+	a := min(max(p.Start, 0), len(r))
+	z := min(max(p.End, 0), len(r))
+	var b strings.Builder
+	for k := a; k < z; k++ {
+		if r[k] != objectChar || k+1 >= len(segs[i].at) {
+			b.WriteRune(r[k])
+			continue
+		}
+		start := segs[i].at[k]
+		end := min(segs[i].end[k], len(src))
+		if start < 0 || start >= end {
+			continue
+		}
+		b.WriteString(src[start:end])
+	}
+	return b.String(), i
 }
 
 // partText is the text a part of a selection holds: its offsets count
@@ -97,7 +147,11 @@ func (e *Editor) sourceSegments() []mdSeg {
 			continue
 		}
 		text := strings.TrimRight(src[b.Start:b.End], "\n")
-		d := parser.Parse(text)
+		// The same syntax the page reads: a formula between single dollars
+		// is one object there, and has to be one here for its source to be
+		// found.
+		d := parser.New(parser.Default | parser.ExtDollarMath)
+		d.Set(text)
 		for k := 0; k < d.Len(); k++ {
 			pb := d.Block(k)
 			switch pb.Kind {
@@ -113,11 +167,13 @@ func (e *Editor) sourceSegments() []mdSeg {
 	return out
 }
 
-// mdSeg is one paragraph of the page: the text it shows, and the source
-// byte each rune of it starts at, with where the text ends after them.
+// mdSeg is one paragraph of the page: the text it shows, the source byte
+// each rune of it starts at, and the byte just past each of them — a
+// formula stands as one rune and takes a whole span of the source.
 type mdSeg struct {
 	text string
 	at   []int
+	end  []int
 }
 
 // segmentOf reads the runes of a paragraph's inlines, and where each of
@@ -126,11 +182,19 @@ type mdSeg struct {
 // source rather than counted from its start.
 func segmentOf(src string, base int, inls []parser.Inline) (mdSeg, bool) {
 	var text strings.Builder
-	var at []int
+	var at, ends []int
 	for _, in := range inls {
 		var shown string
 		switch in.Kind {
-		case parser.Text, parser.Code, parser.HTML, parser.Math,
+		case parser.Math:
+			// A formula stands as one object in the text, and its source is
+			// the fence, the TeX and the fence again: the rune starts where
+			// the first fence does, and ends past the last.
+			text.WriteRune(objectChar)
+			at = append(at, base+in.Start)
+			ends = append(ends, base+in.End)
+			continue
+		case parser.Text, parser.Code, parser.HTML,
 			parser.FootnoteRef, parser.Mention, parser.Reference:
 			shown = in.Text
 		case parser.SoftBreak:
@@ -153,13 +217,14 @@ func segmentOf(src string, base int, inls []parser.Inline) (mdSeg, bool) {
 			text.WriteRune(r)
 			at = append(at, off)
 			off += utf8.RuneLen(r)
+			ends = append(ends, off)
 		}
 	}
 	if text.Len() == 0 || len(at) == 0 {
 		return mdSeg{}, false
 	}
-	at = append(at, at[len(at)-1]+utf8.RuneLen(lastRune(text.String())))
-	return mdSeg{text: text.String(), at: at}, true
+	at = append(at, ends[len(ends)-1])
+	return mdSeg{text: text.String(), at: at, end: ends}, true
 }
 
 // lastRune is the last rune of s, which is not empty.
